@@ -482,13 +482,9 @@ GET /v1/collections/{id}
 - [✅] Configure publishing (Maven coordinates, signing, repository config)
 
 ### Phase 2: Core Models
-- [ ] `Photo` and `PhotoSource` data classes
-- [ ] `Video`, `VideoFile`, `VideoPicture` data classes
-- [ ] `Collection` data class
-- [ ] `User` data class
-- [ ] `PaginatedResponse<T>` generic wrapper
-- [ ] `PexKitError` sealed hierarchy
-- [ ] `RateLimitInfo` data class
+- [✅] data classes: `Photo`, `PhotoSource`, `Video`, `VideoFile`, `VideoPicture`, `Collection`, `User`, `RateLimitInfo`
+- [✅] `PaginatedResponse<T>` generic wrapper
+- [✅] `PexKitError` sealed hierarchy
 
 ### Phase 3: HTTP Client Core
 - [ ] Platform-specific engine providers (expect/actual)

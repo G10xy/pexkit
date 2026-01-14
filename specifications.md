@@ -475,11 +475,11 @@ GET /v1/collections/{id}
 ## ✅ Implementation Phases
 
 ### Phase 1: Project Setup
-- [ ] Initialize Gradle with Kotlin DSL
-- [ ] Configure KMP for Android + iOS targets
-- [ ] Add dependencies (Ktor, Serialization, Coroutines)
-- [ ] Set up version catalog (`libs.versions.toml`)
-- [ ] Configure publishing (Maven coordinates, signing, repository config)
+- [✅] Initialize Gradle with Kotlin DSL
+- [✅] Configure KMP for Android + iOS targets
+- [✅] Add dependencies (Ktor, Serialization, Coroutines)
+- [✅] Set up version catalog (`libs.versions.toml`)
+- [✅] Configure publishing (Maven coordinates, signing, repository config)
 
 ### Phase 2: Core Models
 - [ ] `Photo` and `PhotoSource` data classes

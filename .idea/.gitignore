@@ -59,6 +59,15 @@ Podfile.lock
 .build/
 Package.resolved
 
+# Node.js / JavaScript
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+dist/
+
 # Kotlin Native
 *.klib
 

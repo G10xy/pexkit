@@ -1,2 +1,346 @@
-# pexkit
-Pexels Kotlin Multiplatform Library
+# PexKit
+
+A Kotlin Multiplatform client library for the [Pexels API](https://www.pexels.com/api/), targeting Android and iOS.
+
+PexKit provides a type-safe, coroutine-based API to search and retrieve high-quality stock photos and videos from Pexels.
+
+## Features
+
+- **Kotlin Multiplatform** - Works on Android and iOS from a single codebase
+- **Type-safe API** - Full Kotlin data classes with serialization
+- **Coroutine-based** - All API calls are suspend functions
+- **Result types** - No exceptions for expected errors, use `PexKitResult` for clean error handling
+- **Rate limit aware** - Every response includes rate limit information
+- **Minimal dependencies** - Built on Ktor and kotlinx.serialization
+
+## Installation
+
+Add the dependency to your `build.gradle.kts`:
+
+```kotlin
+// In your shared module or app module
+dependencies {
+    implementation("io.pexkit:pexkit-client:0.1.0")
+}
+```
+
+### Platform-specific setup
+
+**Android** - No additional setup required. PexKit uses OkHttp under the hood.
+
+**iOS** - No additional setup required. PexKit uses the Darwin (URLSession) engine.
+
+## Quick Start
+
+### 1. Get your API key
+
+Sign up at [Pexels API](https://www.pexels.com/api/) to get your free API key.
+
+### 2. Create a client
+
+```kotlin
+import io.pexkit.api.PexKit
+
+// Simple initialization
+val pexkit = PexKit("YOUR_API_KEY")
+
+// Or with custom configuration
+val pexkit = PexKit {
+    apiKey = "YOUR_API_KEY"
+    defaultPerPage = 20
+    timeout = 30.seconds
+    logLevel = LogLevel.HEADERS  // NONE, HEADERS, or BODY
+}
+```
+
+### 3. Make your first request
+
+```kotlin
+import io.pexkit.api.response.PexKitResult
+
+when (val result = pexkit.photos.search("nature")) {
+    is PexKitResult.Success -> {
+        val photos = result.data.data
+        photos.forEach { photo ->
+            println("${photo.photographer}: ${photo.src.medium}")
+        }
+
+        // Rate limit info is always available
+        println("Requests remaining: ${result.rateLimit.remaining}")
+    }
+    is PexKitResult.Failure -> {
+        println("Error: ${result.error.message}")
+    }
+}
+
+// Don't forget to close when done
+pexkit.close()
+```
+
+## API Reference
+
+### Photos
+
+```kotlin
+// Search photos
+val result = pexkit.photos.search(
+    query = "mountains",
+    filters = PhotoFilters(
+        orientation = Orientation.LANDSCAPE,
+        size = Size.LARGE,
+        color = "blue",  // or use Color.BLUE
+    ),
+    pagination = PaginationParams(page = 1, perPage = 20),
+)
+
+// Get curated photos (trending, updated hourly)
+val curated = pexkit.photos.curated()
+
+// Get a specific photo by ID
+val photo = pexkit.photos.get(2014422)
+```
+
+**Photo object properties:**
+- `id` - Unique identifier
+- `width`, `height` - Dimensions in pixels
+- `url` - Pexels page URL
+- `photographer`, `photographerUrl`, `photographerId` - Photographer info
+- `avgColor` - Average color as hex string
+- `src` - Available sizes: `original`, `large2x`, `large`, `medium`, `small`, `portrait`, `landscape`, `tiny`
+- `alt` - Alt text description
+- `liked` - Whether liked by API key owner
+
+### Videos
+
+```kotlin
+// Search videos
+val result = pexkit.videos.search(
+    query = "ocean waves",
+    filters = VideoFilters(
+        orientation = Orientation.LANDSCAPE,
+        minWidth = 1920,
+        minHeight = 1080,
+        minDuration = 10,
+        maxDuration = 60,
+    ),
+    pagination = PaginationParams(page = 1, perPage = 15),
+)
+
+// Get popular videos
+val popular = pexkit.videos.popular()
+
+// Get a specific video by ID
+val video = pexkit.videos.get(857251)
+```
+
+**Video object properties:**
+- `id` - Unique identifier
+- `width`, `height` - Dimensions in pixels
+- `url` - Pexels page URL
+- `image` - Thumbnail URL
+- `duration` - Duration in seconds
+- `user` - Videographer info (`id`, `name`, `url`)
+- `videoFiles` - List of available files with `quality`, `fileType`, `width`, `height`, `fps`, `link`
+- `videoPictures` - Preview thumbnails
+
+### Collections
+
+```kotlin
+// Get featured collections
+val featured = pexkit.collections.featured()
+
+// Get your own collections
+val myCollections = pexkit.collections.my()
+
+// Get media from a collection
+val media = pexkit.collections.media(
+    id = "abc123",
+    type = MediaType.PHOTOS,  // or VIDEOS, or null for both
+    pagination = PaginationParams(page = 1, perPage = 20),
+)
+
+// Collection media can be photos or videos
+when (val result = pexkit.collections.media("abc123")) {
+    is PexKitResult.Success -> {
+        result.data.data.forEach { item ->
+            when (item) {
+                is CollectionMedia.PhotoMedia -> println("Photo: ${item.photographer}")
+                is CollectionMedia.VideoMedia -> println("Video: ${item.user.name}")
+            }
+        }
+    }
+    is PexKitResult.Failure -> { /* handle error */ }
+}
+```
+
+**Collection object properties:**
+- `id` - Unique identifier
+- `title` - Collection title
+- `description` - Collection description
+- `private` - Whether the collection is private
+- `mediaCount`, `photosCount`, `videosCount` - Media counts
+
+## Pagination
+
+All list endpoints return paginated responses:
+
+```kotlin
+val result = pexkit.photos.search("cats")
+
+if (result is PexKitResult.Success) {
+    val response = result.data
+
+    println("Page ${response.page} of results")
+    println("${response.perPage} items per page")
+    println("${response.totalResults} total results")
+
+    if (response.hasNextPage) {
+        // Fetch next page
+        val nextPage = pexkit.photos.search(
+            "cats",
+            pagination = PaginationParams(page = response.page + 1)
+        )
+    }
+}
+```
+
+## Error Handling
+
+PexKit uses a `PexKitResult` sealed class instead of throwing exceptions:
+
+```kotlin
+when (val result = pexkit.photos.search("nature")) {
+    is PexKitResult.Success -> {
+        // Use result.data
+    }
+    is PexKitResult.Failure -> {
+        when (val error = result.error) {
+            is PexKitError.Unauthorized -> {
+                // Invalid or missing API key (401)
+            }
+            is PexKitError.Forbidden -> {
+                // Access forbidden (403)
+            }
+            is PexKitError.NotFound -> {
+                // Resource not found (404)
+                println("Not found: ${error.resource}")
+            }
+            is PexKitError.RateLimited -> {
+                // Too many requests (429)
+                println("Retry after ${error.retryAfter} seconds")
+            }
+            is PexKitError.ServerError -> {
+                // Server error (5xx)
+                println("Server error: ${error.statusCode}")
+            }
+            is PexKitError.NetworkError -> {
+                // Connection failed, timeout, etc.
+                println("Network error: ${error.cause.message}")
+            }
+            is PexKitError.Unknown -> {
+                // Unexpected error
+                println("Unknown error: ${error.statusCode} - ${error.body}")
+            }
+        }
+    }
+}
+```
+
+### Convenience extensions
+
+```kotlin
+// Get data or null
+val photos = result.getOrNull()
+
+// Get data or throw exception
+val photos = result.getOrThrow()
+
+// Get data or default value
+val photos = result.getOrDefault(emptyList())
+
+// Get data or compute fallback (lazy, has access to error)
+val photos = result.getOrElse { error ->
+    logger.warn("Failed: ${error.message}")
+    loadFromCache()
+}
+
+// Transform success data
+val photoCount = result.map { it.totalResults }
+
+// Side effects
+result
+    .onSuccess { data -> updateUI(data) }
+    .onFailure { error -> showError(error) }
+```
+
+## Configuration Options
+
+```kotlin
+val pexkit = PexKit {
+    // Required: Your Pexels API key
+    apiKey = "YOUR_API_KEY"
+
+    // Default results per page (1-80, default: 15)
+    defaultPerPage = 20
+
+    // Request timeout (default: 30 seconds)
+    timeout = 60.seconds
+
+    // Logging level (default: NONE)
+    logLevel = LogLevel.BODY  // NONE, HEADERS, BODY
+
+    // Custom HTTP engine (for testing)
+    httpClientEngine = mockEngine
+}
+```
+
+## Rate Limits
+
+Pexels API has rate limits (default: 200 requests/hour). Every successful response includes rate limit information:
+
+```kotlin
+when (val result = pexkit.photos.search("nature")) {
+    is PexKitResult.Success -> {
+        val rateLimit = result.rateLimit
+        println("Limit: ${rateLimit.limit}")
+        println("Remaining: ${rateLimit.remaining}")
+        println("Resets at: ${rateLimit.reset}")  // Unix timestamp
+    }
+    is PexKitResult.Failure -> {
+        if (result.error is PexKitError.RateLimited) {
+            val retryAfter = (result.error as PexKitError.RateLimited).retryAfter
+            println("Rate limited. Retry after $retryAfter seconds")
+        }
+    }
+}
+```
+
+## Filters Reference
+
+### Photo Filters
+
+| Filter | Values |
+|--------|--------|
+| `orientation` | `LANDSCAPE`, `PORTRAIT`, `SQUARE` |
+| `size` | `LARGE` (24MP), `MEDIUM` (12MP), `SMALL` (4MP) |
+| `color` | Hex code without # (e.g., `"FF5733"`) or predefined: `RED`, `ORANGE`, `YELLOW`, `GREEN`, `TURQUOISE`, `BLUE`, `VIOLET`, `PINK`, `BROWN`, `BLACK`, `GRAY`, `WHITE` |
+| `locale` | `EN_US`, `DE_DE`, `FR_FR`, `ES_ES`, `IT_IT`, `JA_JP`, and more |
+
+### Video Filters
+
+| Filter | Description |
+|--------|-------------|
+| `orientation` | `LANDSCAPE`, `PORTRAIT`, `SQUARE` |
+| `size` | `LARGE`, `MEDIUM`, `SMALL` |
+| `locale` | Same as photo filters |
+| `minWidth` | Minimum width in pixels |
+| `minHeight` | Minimum height in pixels |
+| `minDuration` | Minimum duration in seconds |
+| `maxDuration` | Maximum duration in seconds |
+
+## Official Documentation
+
+For complete API documentation, rate limit details, and terms of use, visit the official Pexels API documentation:
+
+**[Pexels API Documentation](https://www.pexels.com/api/documentation/)**
+

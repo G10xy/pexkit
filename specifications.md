@@ -487,11 +487,11 @@ GET /v1/collections/{id}
 - [✅] `PexKitError` sealed hierarchy
 
 ### Phase 3: HTTP Client Core
-- [ ] Platform-specific engine providers (expect/actual)
-- [ ] `PexKitConfig` configuration class
-- [ ] Base HTTP client factory with auth interceptor
-- [ ] Request/response logging
-- [ ] Error response parsing
+- [✅] Platform-specific engine providers (expect/actual)
+- [✅] `PexKitConfig` configuration class
+- [✅] Base HTTP client factory with auth interceptor
+- [✅] Request/response logging
+- [✅] Error response parsing
 
 ### Phase 4: API Implementation
 - [ ] `PhotosApi` interface + implementation

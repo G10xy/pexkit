@@ -494,19 +494,19 @@ GET /v1/collections/{id}
 - [✅] Error response parsing
 
 ### Phase 4: API Implementation
-- [ ] `PhotosApi` interface + implementation
-  - [ ] `search()`
-  - [ ] `curated()`
-  - [ ] `get(id)`
-- [ ] `VideosApi` interface + implementation
-  - [ ] `search()`
-  - [ ] `popular()`
-  - [ ] `get(id)`
-- [ ] `CollectionsApi` interface + implementation
-  - [ ] `featured()`
-  - [ ] `my()`
-  - [ ] `media(id)`
-- [ ] `PexKit` as main entry point
+- [✅] `PhotosApi` interface + implementation
+  - [✅] `search()`
+  - [✅] `curated()`
+  - [✅] `get(id)`
+- [✅] `VideosApi` interface + implementation
+  - [✅] `search()`
+  - [✅] `popular()`
+  - [✅] `get(id)`
+- [✅] `CollectionsApi` interface + implementation
+  - [✅] `featured()`
+  - [✅] `my()`
+  - [✅] `media(id)`
+- [✅] `PexKit` as main entry point
 
 ### Phase 5: Testing
 - [ ] Unit tests for JSON serialization

@@ -509,16 +509,15 @@ GET /v1/collections/{id}
 - [✅] `PexKit` as main entry point
 
 ### Phase 5: Testing
-- [✅]] Unit tests for JSON serialization
-- [✅]] Mock responses for all endpoints by using data classes
-- [✅]] Mock client tests for each endpoint
-- [✅]] Error handling tests (401, 403, 429, 500)
-- [✅]] Pagination tests
+- [✅] Unit tests for JSON serialization
+- [✅] Mock responses for all endpoints by using data classes
+- [✅] Mock client tests for each endpoint
+- [✅] Error handling tests (401, 403, 429, 500)
+- [✅] Pagination tests
 
 ### Phase 6: Documentation & Publishing
-- [ ] Complete KDoc for all public APIs
-- [ ] README with usage examples
-- [ ] CHANGELOG.md
+- [✅] README with usage examples
+- [✅] CHANGELOG.md
 - [ ] Publish to Maven Central
 
 ---

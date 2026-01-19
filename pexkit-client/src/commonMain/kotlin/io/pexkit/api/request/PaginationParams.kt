@@ -1,12 +1,14 @@
 package io.pexkit.api.request
 
+import kotlin.jvm.JvmOverloads
+
 /**
  * Pagination parameters for list endpoints.
  *
  * @property page Page number (1-indexed). Default: 1.
  * @property perPage Number of results per page (1-80). Default: uses client's defaultPerPage.
  */
-public data class PaginationParams(
+public data class PaginationParams @JvmOverloads constructor(
     val page: Int = 1,
     val perPage: Int? = null,
 ) {

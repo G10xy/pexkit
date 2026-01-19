@@ -1,5 +1,8 @@
 package io.pexkit.api.request
 
+import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmStatic
+
 
 /**
  * Filters for photo search.
@@ -9,7 +12,7 @@ package io.pexkit.api.request
  * @property color Filter by dominant color (predefined or hex code without #).
  * @property locale Locale for search query interpretation.
  */
-public data class PhotoFilters(
+public data class PhotoFilters @JvmOverloads constructor(
     val orientation: Orientation? = null,
     val size: Size? = null,
     val color: String? = null,
@@ -19,6 +22,7 @@ public data class PhotoFilters(
         /**
          * Creates filters with a predefined color.
          */
+        @JvmStatic
         public fun withColor(color: Color): PhotoFilters = PhotoFilters(color = color.value)
 
         /**
@@ -26,6 +30,7 @@ public data class PhotoFilters(
          *
          * @param hexColor Hex color code without the # prefix (e.g., "FF5733").
          */
+        @JvmStatic
         public fun withHexColor(hexColor: String): PhotoFilters {
             require(hexColor.matches(Regex("^[0-9A-Fa-f]{6}$"))) {
                 "hexColor must be a valid 6-digit hexadecimal string"

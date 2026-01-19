@@ -1,5 +1,7 @@
 package io.pexkit.api.request
 
+import kotlin.jvm.JvmOverloads
+
 /**
  * Filters for video search and popular videos.
  *
@@ -11,7 +13,7 @@ package io.pexkit.api.request
  * @property minDuration Minimum video duration in seconds.
  * @property maxDuration Maximum video duration in seconds.
  */
-public data class VideoFilters(
+public data class VideoFilters @JvmOverloads constructor(
     val orientation: Orientation? = null,
     val size: Size? = null,
     val locale: Locale? = null,

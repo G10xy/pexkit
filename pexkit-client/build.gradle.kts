@@ -14,6 +14,12 @@ version = "0.1.0"
 kotlin {
     explicitApi()
 
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
+        }
+    }
+
     androidTarget {
         publishLibraryVariants("release")
         compilerOptions {
@@ -54,6 +60,10 @@ kotlin {
 
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+        }
+
+        jvmMain.dependencies {
+            implementation(libs.ktor.client.cio)
         }
     }
 }

@@ -20,10 +20,8 @@ internal object MockResponses {
 
     private val json = Json { prettyPrint = false }
 
-    // Single photo JSON
     val PHOTO: String = json.encodeToString(MockData.photo)
 
-    // Photos search response
     val PHOTOS_SEARCH: String = json.encodeToString(
         PhotosApiResponse(
             photos = listOf(MockData.photo),
@@ -35,7 +33,6 @@ internal object MockResponses {
         )
     )
 
-    // Photos search page 2 response
     val PHOTOS_SEARCH_PAGE_2: String = json.encodeToString(
         PhotosApiResponse(
             photos = listOf(MockData.photoPage2),
@@ -47,10 +44,8 @@ internal object MockResponses {
         )
     )
 
-    // Single video JSON
     val VIDEO: String = json.encodeToString(MockData.video)
 
-    // Videos search response
     val VIDEOS_SEARCH: String = json.encodeToString(
         VideosApiResponse(
             videos = listOf(MockData.video),
@@ -62,10 +57,8 @@ internal object MockResponses {
         )
     )
 
-    // Single collection JSON
     val COLLECTION: String = json.encodeToString(MockData.collection)
 
-    // Collections list response
     val COLLECTIONS_LIST: String = json.encodeToString(
         CollectionsApiResponse(
             collections = listOf(MockData.collection),
@@ -77,7 +70,6 @@ internal object MockResponses {
         )
     )
 
-    // Collection media response (mixed photos and videos)
     val COLLECTION_MEDIA: String = json.encodeToString(
         CollectionMediaApiResponse(
             id = "abc123",
@@ -148,7 +140,6 @@ internal object MockResponses {
         )
     )
 
-    // Error responses
     const val ERROR_UNAUTHORIZED = """{"error": "Unauthorized"}"""
     const val ERROR_NOT_FOUND = """{"error": "Not Found"}"""
 }

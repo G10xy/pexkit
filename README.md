@@ -1,14 +1,15 @@
 # PexKit
 
-A Kotlin Multiplatform client library for the [Pexels API](https://www.pexels.com/api/), targeting Android and iOS.
+A Kotlin Multiplatform client library for the [Pexels API](https://www.pexels.com/api/), targeting Android, iOS, and JVM backends.
 
 PexKit provides a type-safe, coroutine-based API to search and retrieve high-quality stock photos and videos from Pexels.
 
 ## Features
 
-- **Kotlin Multiplatform** - Works on Android and iOS from a single codebase
+- **Kotlin Multiplatform** - Works on Android, iOS, and JVM from a single codebase
 - **Type-safe API** - Full Kotlin data classes with serialization
 - **Coroutine-based** - All API calls are suspend functions
+- **Java-friendly** - Blocking and async APIs for JVM/Java backends
 - **Result types** - No exceptions for expected errors, use `PexKitResult` for clean error handling
 - **Rate limit aware** - Every response includes rate limit information
 - **Minimal dependencies** - Built on Ktor and kotlinx.serialization
@@ -29,6 +30,8 @@ dependencies {
 **Android** - No additional setup required. PexKit uses OkHttp under the hood.
 
 **iOS** - No additional setup required. PexKit uses the Darwin (URLSession) engine.
+
+**JVM** - No additional setup required. PexKit uses the CIO (Coroutine I/O) engine. Requires Java 21+.
 
 ## Quick Start
 
@@ -337,6 +340,193 @@ when (val result = pexkit.photos.search("nature")) {
 | `minHeight` | Minimum height in pixels |
 | `minDuration` | Minimum duration in seconds |
 | `maxDuration` | Maximum duration in seconds |
+
+## Backend Usage (JVM)
+
+PexKit provides full support for JVM backends, including Spring Boot, Ktor Server, and standalone applications. Choose between coroutine-based, blocking, or async APIs based on your needs.
+
+### Kotlin Backend (Coroutines)
+
+For Kotlin backends using coroutines (recommended):
+
+```kotlin
+import io.pexkit.api.PexKit
+import io.pexkit.api.response.PexKitResult
+
+class PhotoService {
+    private val pexkit = PexKit("YOUR_API_KEY")
+
+    suspend fun searchPhotos(query: String): List<Photo> {
+        return when (val result = pexkit.photos.search(query)) {
+            is PexKitResult.Success -> result.data.data
+            is PexKitResult.Failure -> throw result.error.toException()
+        }
+    }
+
+    fun close() = pexkit.close()
+}
+```
+
+### Kotlin Backend (Blocking API)
+
+For Kotlin code that doesn't use coroutines:
+
+```kotlin
+import io.pexkit.api.blocking.PexKitBlocking
+
+class PhotoService {
+    private val pexkit = PexKitBlocking.create("YOUR_API_KEY")
+
+    fun searchPhotos(query: String): List<Photo> {
+        // Blocking call - throws PexKitException on error
+        return pexkit.photos.search(query).data
+    }
+
+    fun close() = pexkit.close()
+}
+```
+
+### Java Backend (Blocking API)
+
+For Java applications using blocking calls:
+
+```java
+import io.pexkit.api.blocking.PexKitBlocking;
+import io.pexkit.api.model.Photo;
+import io.pexkit.api.response.PaginatedResponse;
+import io.pexkit.api.response.PexKitException;
+
+public class PhotoService implements AutoCloseable {
+    private final PexKitBlocking pexkit;
+
+    public PhotoService(String apiKey) {
+        this.pexkit = PexKitBlocking.create(apiKey);
+    }
+
+    public List<Photo> searchPhotos(String query) throws PexKitException {
+        PaginatedResponse<Photo> response = pexkit.photos().search(query);
+        return response.getData();
+    }
+
+    @Override
+    public void close() {
+        pexkit.close();
+    }
+}
+
+// Usage with try-with-resources
+try (PexKitBlocking pexkit = PexKitBlocking.create("YOUR_API_KEY")) {
+    PaginatedResponse<Photo> photos = pexkit.photos().search("nature");
+    photos.getData().forEach(photo ->
+        System.out.println(photo.getPhotographer())
+    );
+}
+```
+
+### Java Backend (Async with CompletableFuture)
+
+For Java applications using async/non-blocking patterns:
+
+```java
+import io.pexkit.api.blocking.PexKitBlocking;
+import java.util.concurrent.CompletableFuture;
+
+public class PhotoService {
+    private final PexKitBlocking pexkit = PexKitBlocking.create("YOUR_API_KEY");
+
+    public CompletableFuture<List<Photo>> searchPhotosAsync(String query) {
+        return pexkit.photos().searchAsync(query)
+            .thenApply(response -> response.getData());
+    }
+
+    // Chain multiple async operations
+    public CompletableFuture<Void> processPhotos(String query) {
+        return pexkit.photos().searchAsync(query)
+            .thenAccept(response -> {
+                response.getData().forEach(photo ->
+                    processPhoto(photo)
+                );
+            })
+            .exceptionally(ex -> {
+                logger.error("Failed to search photos", ex);
+                return null;
+            });
+    }
+}
+```
+
+### Spring Boot Integration
+
+Example service for Spring Boot applications:
+
+```kotlin
+import io.pexkit.api.blocking.PexKitBlocking
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Service
+import jakarta.annotation.PreDestroy
+
+@Service
+class PexelsService(
+    @Value("\${pexels.api-key}") apiKey: String
+) {
+    private val pexkit = PexKitBlocking.create(apiKey)
+
+    fun searchPhotos(query: String, page: Int = 1, perPage: Int = 15): PaginatedResponse<Photo> {
+        return pexkit.photos.search(
+            query = query,
+            pagination = PaginationParams(page = page, perPage = perPage)
+        )
+    }
+
+    fun getPhoto(id: Long): Photo = pexkit.photos.get(id)
+
+    @PreDestroy
+    fun cleanup() = pexkit.close()
+}
+```
+
+Or in Java:
+
+```java
+import io.pexkit.api.blocking.PexKitBlocking;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import jakarta.annotation.PreDestroy;
+
+@Service
+public class PexelsService {
+    private final PexKitBlocking pexkit;
+
+    public PexelsService(@Value("${pexels.api-key}") String apiKey) {
+        this.pexkit = PexKitBlocking.create(apiKey);
+    }
+
+    public PaginatedResponse<Photo> searchPhotos(String query) {
+        return pexkit.photos().search(query);
+    }
+
+    @PreDestroy
+    public void cleanup() {
+        pexkit.close();
+    }
+}
+```
+
+### Thread Safety
+
+PexKit and PexKitBlocking instances are **thread-safe** and can be shared across multiple threads. You should:
+
+- Create a single instance and reuse it (e.g., as a singleton or Spring bean)
+- Call `close()` when your application shuts down to release resources
+- For Spring applications, use `@PreDestroy` to ensure proper cleanup
+
+### API Comparison
+
+| API Style | Class | Returns | Error Handling |
+|-----------|-------|---------|----------------|
+| Coroutines (Kotlin) | `PexKit` | `PexKitResult<T>` | Pattern matching |
+| Blocking (Kotlin/Java) | `PexKitBlocking` | `T` directly | Throws `PexKitException` |
+| Async (Java) | `PexKitBlocking.*Async()` | `CompletableFuture<T>` | `.exceptionally()` / `.handle()` |
 
 ## Official Documentation
 

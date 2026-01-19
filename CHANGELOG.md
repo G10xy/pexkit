@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **JVM/Backend support** - PexKit now works on JVM backends (Spring Boot, Ktor Server, etc.)
+  - CIO engine for HTTP on JVM (requires Java 21+)
+  - `PexKitBlocking` - Java-friendly blocking API wrapper
+  - `PhotosApiBlocking`, `VideosApiBlocking`, `CollectionsApiBlocking` - Blocking API wrappers
+  - Blocking methods using `runBlocking` for synchronous calls
+  - Async methods returning `CompletableFuture` for Java async patterns
+  - Implements `AutoCloseable` for try-with-resources support
+- **Java interop annotations**
+  - `@JvmOverloads` on `PhotoFilters`, `VideoFilters`, `PaginationParams` constructors
+  - `@JvmStatic` on `PhotoFilters.withColor()` and `PhotoFilters.withHexColor()`
+  - `@JvmStatic` on `PexKitBlocking.create()` factory methods
+
+### Technical Details
+
+- JVM: CIO engine, Java 21+
+
 ## [0.1.0] - 15-01-2026
 
 ### Added

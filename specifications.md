@@ -1,21 +1,23 @@
 # specifications.md - PexKit
 
 > **Purpose**: This file provides context and specifications for building this library.
-> **Project**: A Kotlin Multiplatform client library for the Pexels API, targeting mobile platforms (Android & iOS).
+> **Project**: A Kotlin Multiplatform client library for the Pexels API, targeting mobile platforms (Android & iOS) and JVM backends.
 
 ---
 
 ## 🎯 Project Overview
 
 **Name**: `pexkit`  
-**Description**: An idiomatic Kotlin Multiplatform client library for the Pexels API, enabling mobile developers to easily search and retrieve high-quality stock photos and videos.
+**Description**: An idiomatic Kotlin Multiplatform client library for the Pexels API, enabling mobile developers and backend engineers to easily search and retrieve high-quality stock photos and videos.
 
 **Goals**:
 - Provide a type-safe, coroutine-based API
-- Support Android and iOS platforms
+- Support Android, iOS, JVM, and JavaScript platforms
 - Follow Kotlin idioms and best practices
 - Minimize dependencies
 - Make integration dead simple
+- Provide Java-friendly APIs for backend usage
+- Provide Promise-based APIs for JavaScript/TypeScript usage
 
 ---
 
@@ -38,8 +40,9 @@
 |----------|--------|-------------|
 | **Android** | Ktor OkHttp | minSdk 24 (Android 7.0) |
 | **iOS** | Ktor Darwin | iOS 14.0+ |
-
-> **Note**: JVM/Desktop and JS are out of scope for initial release. Focus on mobile.
+| **JVM** | Ktor CIO | Java 21+ |
+| **JS/Browser** | Ktor JS | Modern browsers (ES2015+) |
+| **JS/Node.js** | Ktor JS | Node.js 18+ |
 
 ---
 
@@ -96,10 +99,45 @@ pexkit/
 │       │   └── kotlin/
 │       │       └── io/pexkit/api/
 │       │           └── HttpEngineProvider.android.kt
-│       └── iosMain/
+│       ├── iosMain/
+│       │   └── kotlin/
+│       │       └── io/pexkit/api/
+│       │           └── HttpEngineProvider.ios.kt
+│       ├── jvmMain/
+│       │   └── kotlin/
+│       │       └── io/pexkit/api/
+│       │           ├── internal/
+│       │           │   └── HttpEngineProvider.jvm.kt
+│       │           ├── blocking/                 # Java-friendly blocking APIs
+│       │           │   ├── PexKitBlocking.kt
+│       │           │   ├── PhotosApiBlocking.kt
+│       │           │   ├── VideosApiBlocking.kt
+│       │           │   └── CollectionsApiBlocking.kt
+│       │           └── async/                    # Java-friendly async APIs (CompletableFuture)
+│       │               ├── PexKitAsync.kt
+│       │               ├── PhotosApiAsync.kt
+│       │               ├── VideosApiAsync.kt
+│       │               └── CollectionsApiAsync.kt
+│       ├── jvmTest/
+│       │   └── kotlin/
+│       │       └── io/pexkit/api/
+│       │           ├── BlockingApiTest.kt
+│       │           └── AsyncApiTest.kt
+│       ├── jsMain/
+│       │   └── kotlin/
+│       │       └── io/pexkit/api/
+│       │           ├── internal/
+│       │           │   └── HttpEngineProvider.js.kt
+│       │           └── js/                       # JavaScript-friendly Promise APIs
+│       │               ├── PexKitJs.kt
+│       │               ├── PhotosApiJs.kt
+│       │               ├── VideosApiJs.kt
+│       │               ├── CollectionsApiJs.kt
+│       │               └── OptionsJs.kt
+│       └── jsTest/
 │           └── kotlin/
 │               └── io/pexkit/api/
-│                   └── HttpEngineProvider.ios.kt
+│                   └── JsApiTest.kt
 └── sample/                      # Sample usage (optional)
     └── shared/                  # Shared sample code
 ```
@@ -178,6 +216,20 @@ val client = PexKit {
     timeout = 30.seconds
     logging = LogLevel.BODY
 }
+```
+
+### 5. JVM/Java Interoperability (Phase 7)
+Provide **blocking wrappers** for Java compatibility:
+
+```kotlin
+// Kotlin coroutine API (primary)
+suspend fun search(query: String): PexKitResult<PaginatedResponse<Photo>>
+
+// JVM blocking API (for Java interop)
+fun searchBlocking(query: String): PaginatedResponse<Photo>  // throws PexKitException on error
+
+// JVM CompletableFuture API (for async Java)
+fun searchAsync(query: String): CompletableFuture<PaginatedResponse<Photo>>
 ```
 
 ---
@@ -474,26 +526,26 @@ GET /v1/collections/{id}
 
 ## ✅ Implementation Phases
 
-### Phase 1: Project Setup
+### Phase 1: Project Setup 
 - [✅] Initialize Gradle with Kotlin DSL
 - [✅] Configure KMP for Android + iOS targets
 - [✅] Add dependencies (Ktor, Serialization, Coroutines)
 - [✅] Set up version catalog (`libs.versions.toml`)
 - [✅] Configure publishing (Maven coordinates, signing, repository config)
 
-### Phase 2: Core Models
+### Phase 2: Core Models 
 - [✅] data classes: `Photo`, `PhotoSource`, `Video`, `VideoFile`, `VideoPicture`, `Collection`, `User`, `RateLimitInfo`
 - [✅] `PaginatedResponse<T>` generic wrapper
 - [✅] `PexKitError` sealed hierarchy
 
-### Phase 3: HTTP Client Core
+### Phase 3: HTTP Client Core 
 - [✅] Platform-specific engine providers (expect/actual)
 - [✅] `PexKitConfig` configuration class
 - [✅] Base HTTP client factory with auth interceptor
 - [✅] Request/response logging
 - [✅] Error response parsing
 
-### Phase 4: API Implementation
+### Phase 4: API Implementation 
 - [✅] `PhotosApi` interface + implementation
   - [✅] `search()`
   - [✅] `curated()`
@@ -508,17 +560,175 @@ GET /v1/collections/{id}
   - [✅] `media(id)`
 - [✅] `PexKit` as main entry point
 
-### Phase 5: Testing
+### Phase 5: Testing 
 - [✅] Unit tests for JSON serialization
 - [✅] Mock responses for all endpoints by using data classes
 - [✅] Mock client tests for each endpoint
 - [✅] Error handling tests (401, 403, 429, 500)
 - [✅] Pagination tests
 
-### Phase 6: Documentation & Publishing
+### Phase 6: Documentation & Publishing 
 - [✅] README with usage examples
 - [✅] CHANGELOG.md
-- [ ] Publish to Maven Central
+- [-] Publish to Maven Central
+
+### Phase 7: JVM/Backend Support 🆕
+Add JVM target to enable usage in Kotlin/Java backend applications (Spring Boot, Ktor Server, etc.).
+
+#### 7.1 Add JVM Target and HTTP Engine
+- [✅] Add `jvm()` target in `pexkit-client/build.gradle.kts` with Java 21 support
+- [✅] Enable Java interop with `withJava()`
+- [✅] Configure JVM toolchain for Java 21
+- [✅] Add `ktor-client-cio` dependency to `libs.versions.toml`
+- [✅] Add CIO engine dependency in `jvmMain.dependencies` block
+- [✅] Create `HttpEngineProvider.jvm.kt` in `src/jvmMain/kotlin/io/pexkit/api/internal/` using CIO engine (follow the same pattern as Android and iOS providers)
+
+#### 7.2 Create JVM API Wrappers (Java-friendly)
+Create separate blocking and async wrappers in `src/jvmMain/kotlin/io/pexkit/api/` for Java interoperability. The APIs are split into two distinct packages for cleaner usage:
+
+Pure blocking wrappers using `runBlocking` — for synchronous Java code:
+
+- [✅] Create `PexKitBlocking.kt` — Main entry point wrapping `PexKit`, implementing `AutoCloseable`, with `@JvmStatic` factory methods
+- [✅] Create `PhotosApiBlocking.kt` — Wrapper for `PhotosApi` with: `search()`, `curated()`, `get()`
+- [✅] Create `VideosApiBlocking.kt` — Wrapper for `VideosApi` with: `search()`, `popular()`, `get()`
+- [✅] Create `CollectionsApiBlocking.kt` — Wrapper for `CollectionsApi` with: `featured()`, `my()`, `media()`
+
+**Requirements for blocking wrappers:**
+- Use `runBlocking` for all methods
+- Throw `PexKitException` on errors (use `getOrThrow()`)
+- Add `@JvmOverloads` for methods with default parameters
+- Add KDoc documentation
+
+Pure async wrappers returning `CompletableFuture` — for async Java code:
+
+- [✅] Create `PexKitAsync.kt` — Main entry point wrapping `PexKit`, implementing `AutoCloseable`, with `@JvmStatic` factory methods, owns `ExecutorService`
+- [✅] Create `PhotosApiAsync.kt` — Wrapper for `PhotosApi` with: `search()`, `curated()`, `get()` → all return `CompletableFuture`
+- [✅] Create `VideosApiAsync.kt` — Wrapper for `VideosApi` with: `search()`, `popular()`, `get()` → all return `CompletableFuture`
+- [✅] Create `CollectionsApiAsync.kt` — Wrapper for `CollectionsApi` with: `featured()`, `my()`, `media()` → all return `CompletableFuture`
+
+**Requirements for async wrappers:**
+- Use `CompletableFuture.supplyAsync()` with a cached thread pool
+- Complete exceptionally with `PexKitException` on errors
+- Add `@JvmOverloads` for methods with default parameters
+- Add KDoc documentation
+- Shutdown executor in `close()` method
+
+#### 7.3 Add Java Interop Annotations
+- [✅] Add `@JvmStatic` to companion object methods in existing code where appropriate
+- [✅] Add `@JvmOverloads` to functions with default parameters for better Java interop
+- [✅] Ensure enum values are accessible from Java
+
+#### 7.4 JVM-Specific Tests
+Create separate test files for blocking and async APIs:
+
+**`src/jvmTest/kotlin/io/pexkit/api/BlockingApiTest.kt`:**
+- [✅] Blocking search returns photos
+- [✅] Blocking curated returns photos
+- [✅] Blocking get photo/video by ID works
+- [✅] Blocking API throws `PexKitException` on error (401, 404, 429)
+- [✅] `AutoCloseable` works correctly (try-with-resources pattern)
+
+**`src/jvmTest/kotlin/io/pexkit/api/AsyncApiTest.kt`:**
+- [✅] Async search returns `CompletableFuture` that resolves correctly
+- [✅] Async curated returns `CompletableFuture` that resolves correctly
+- [✅] Async get photo/video by ID returns `CompletableFuture` that resolves correctly
+- [✅] Async API completes exceptionally with `PexKitException` on error (401, 404, 429)
+- [✅] `AutoCloseable` works correctly (try-with-resources pattern)
+
+#### 7.5 Update Documentation
+- [✅] Add "Backend Usage" section to README.md with examples for:
+  - Kotlin backend usage (coroutines)
+  - Kotlin backend usage (blocking API)
+  - Java backend usage (blocking API)
+  - Java backend usage (async with `CompletableFuture`)
+- [✅] Document thread-safety considerations
+- [✅] Add Spring Boot integration example
+
+### Phase 8: JavaScript/Browser/Node.js Support 🆕
+Add JS target to enable usage in browser applications (React, Vue, Angular) and Node.js backends.
+
+#### 8.1 Add JS Target
+- [ ] Add `js()` target in `pexkit-client/build.gradle.kts` with both browser and Node.js support
+- [ ] Configure IR compiler (default in Kotlin 2.0+)
+- [ ] Configure browser and Node.js test environments
+- [ ] Generate TypeScript declarations for better IDE support
+
+#### 8.2 Add JS HTTP Engine
+- [ ] Add `ktor-client-js` dependency to `libs.versions.toml`
+- [ ] Add JS engine dependency in `jsMain.dependencies` block
+- [ ] Create `HttpEngineProvider.js.kt` in `src/jsMain/kotlin/io/pexkit/api/internal/` using Ktor JS engine (follow the same pattern as other platform providers)
+
+#### 8.3 Create Promise-based API Wrappers (JavaScript-friendly)
+Create JS-friendly wrappers in `src/jsMain/kotlin/io/pexkit/api/js/` for JavaScript interoperability. All methods must return `Promise` (no blocking APIs possible in JS):
+
+- [ ] Create `PexKitJs.kt` — Main entry point for JS API with `@JsExport` annotation, exposing:
+  - `photos` property returning `PhotosApiJs`
+  - `videos` property returning `VideosApiJs`
+  - `collections` property returning `CollectionsApiJs`
+  - `close()` method
+- [ ] Create `PhotosApiJs.kt` — Wrapper for `PhotosApi` returning `Promise`:
+  - `search(query, options?)` → `Promise<PaginatedResponse<Photo>>`
+  - `curated(options?)` → `Promise<PaginatedResponse<Photo>>`
+  - `get(id)` → `Promise<Photo>`
+- [ ] Create `VideosApiJs.kt` — Wrapper for `VideosApi` returning `Promise`:
+  - `search(query, options?)` → `Promise<PaginatedResponse<Video>>`
+  - `popular(options?)` → `Promise<PaginatedResponse<Video>>`
+  - `get(id)` → `Promise<Video>`
+- [ ] Create `CollectionsApiJs.kt` — Wrapper for `CollectionsApi` returning `Promise`:
+  - `featured(options?)` → `Promise<PaginatedResponse<Collection>>`
+  - `my(options?)` → `Promise<PaginatedResponse<Collection>>`
+  - `media(id, options?)` → `Promise<PaginatedResponse<CollectionMedia>>`
+
+**Requirements for JS wrappers:**
+- Use `@JsExport` annotation on all public classes and functions
+- Use `GlobalScope.promise { }` or `Promise` from `kotlin.js` to wrap coroutines
+- Use `@JsName` annotation where needed to control generated JS names
+- Create JS-friendly option objects instead of multiple parameters with defaults
+- Handle errors by rejecting promises with meaningful error objects
+- Add KDoc documentation
+
+#### 8.4 Create JS-friendly Option/Config Classes
+- [ ] Create `PexKitOptionsJs.kt` — Configuration object for JS with simple properties (apiKey, timeout, etc.)
+- [ ] Create `SearchOptionsJs.kt` — Combined filters and pagination options for search methods
+- [ ] Create `PaginationOptionsJs.kt` — Simple pagination object (page, perPage)
+- [ ] Ensure all option classes are `@JsExport` annotated and use JS-friendly types
+
+#### 8.5 TypeScript Declarations
+- [ ] Enable TypeScript declaration generation in build.gradle.kts
+- [ ] Verify generated `.d.ts` files are correct and usable
+- [ ] Add manual type refinements if needed for better TypeScript experience
+
+#### 8.6 JS-Specific Tests
+Create `src/jsTest/kotlin/io/pexkit/api/JsApiTest.kt` with tests for:
+- [ ] Promise-based search resolves correctly
+- [ ] Promise-based search rejects on error (401, 404, etc.)
+- [ ] Options objects work correctly
+- [ ] All exported classes are accessible
+
+#### 8.7 Update Documentation
+- [ ] Add "Browser/Node.js Usage" section to README.md with examples for:
+  - Installation via npm (if published) or direct usage
+  - Browser usage (ES modules)
+  - Node.js usage (CommonJS and ES modules)
+  - TypeScript usage with type definitions
+  - React/Vue integration example (optional)
+- [ ] Document browser-specific considerations (CORS, etc.)
+- [ ] Document Node.js-specific considerations
+
+#### 8.8 Update Build Configuration
+- [ ] Configure JS artifact output (UMD, CommonJS, ES modules)
+- [ ] Ensure JS artifact is published alongside other platforms
+- [ ] Configure npm publication settings (optional)
+- [ ] Update CHANGELOG.md with JS support
+
+#### 8.9 Verification
+- [ ] Run `./gradlew jsTest` — all JS tests pass
+- [ ] Run `./gradlew jsBrowserTest` — browser tests pass
+- [ ] Run `./gradlew jsNodeTest` — Node.js tests pass
+- [ ] Run `./gradlew build` — all platforms build successfully
+- [ ] Test importing in a sample browser project (vanilla JS or React)
+- [ ] Test importing in a sample Node.js project
+- [ ] Verify TypeScript declarations work in a TS project
 
 ---
 
@@ -562,6 +772,37 @@ class PexKitClientTest {
 }
 ```
 
+### JVM Blocking API Tests (jvmTest)
+```kotlin
+class BlockingApiTest {
+    @Test
+    fun `blocking search works`() {
+        val client = PexKitBlocking.create {
+            apiKey = "test"
+            httpClientEngine = mockEngine
+        }
+        val result = client.photos.search("nature")
+        assertTrue(result.data.isNotEmpty())
+    }
+}
+```
+
+### JVM Async API Tests (jvmTest)
+```kotlin
+class AsyncApiTest {
+    @Test
+    fun `async search returns CompletableFuture that resolves`() {
+        val client = PexKitAsync.create {
+            apiKey = "test"
+            httpClientEngine = mockEngine
+        }
+        val future = client.photos.search("nature")
+        val result = future.get() // Blocking wait
+        assertTrue(result.data.isNotEmpty())
+    }
+}
+```
+
 ---
 
 ## 🚀 Build Commands
@@ -575,6 +816,18 @@ class PexKitClientTest {
 
 # Run only common tests
 ./gradlew :pexkit-client:testDebugUnitTest
+
+# Run only JVM tests
+./gradlew :pexkit-client:jvmTest
+
+# Run only JS tests (all)
+./gradlew :pexkit-client:jsTest
+
+# Run only JS browser tests
+./gradlew :pexkit-client:jsBrowserTest
+
+# Run only JS Node.js tests
+./gradlew :pexkit-client:jsNodeTest
 
 # Publish to local Maven
 ./gradlew publishToMavenLocal
@@ -591,17 +844,23 @@ class PexKitClientTest {
 
 ---
 
-## 📝 Notes for Claude
+## 📝 Notes for Development
 
 1. **Always prefer idiomatic Kotlin** over Java-style code
 2. **Use explicit visibility modifiers** (`public`, `internal`, `private`)
 3. **Avoid `lateinit`** — prefer lazy initialization or nullable with defaults
-4. **All API methods must be `suspend`** — no blocking calls
+4. **All API methods must be `suspend`** — no blocking calls in commonMain
 5. **Return `Result` types** — don't throw exceptions for expected errors
 6. **Keep platform-specific code minimal** — only HTTP engine differs
 7. **Test serialization thoroughly** — API responses are the contract
 8. **Document nullability** — when can fields be null?
 9. **Include request/response logging** — essential for debugging
+10. **For JVM blocking APIs** — use `runBlocking` and `@JvmOverloads` for Java interop
+11. **Thread safety** — document that PexKit instances are thread-safe
+12. **Resource cleanup** — ensure `close()` is called, implement `AutoCloseable` for Java try-with-resources
+13. **For JS APIs** — use `@JsExport`, return `Promise`, no blocking operations allowed
+14. **JS naming** — use `@JsName` to ensure clean JavaScript API names
+15. **TypeScript** — ensure generated declarations are usable and well-typed
 
 ---
 
@@ -612,6 +871,7 @@ class PexKitClientTest {
 - [Kotlin Multiplatform Guide](https://kotlinlang.org/docs/multiplatform.html)
 - [kotlinx.serialization Guide](https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/basic-serialization.md)
 - [Publishing to Maven Central](https://central.sonatype.org/publish/publish-guide/)
+- [Kotlin/Java Interop](https://kotlinlang.org/docs/java-to-kotlin-interop.html)
 
 ---
 

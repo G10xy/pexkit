@@ -8,5 +8,6 @@ import io.ktor.client.engine.HttpClientEngineFactory
  *
  * - Android: OkHttp engine
  * - iOS: Darwin engine
+ * - JVM: CIO engine
  */
 internal expect val httpClientEngineFactory: HttpClientEngineFactory<HttpClientEngineConfig>

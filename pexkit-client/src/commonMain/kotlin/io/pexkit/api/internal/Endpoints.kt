@@ -20,5 +20,10 @@ internal object Endpoints {
     // Collections
     const val COLLECTIONS_FEATURED = "$PHOTOS_BASE/collections/featured"
     const val COLLECTIONS_MY = "$PHOTOS_BASE/collections"
-    fun collectionMedia(id: String): String = "$PHOTOS_BASE/collections/$id"
+    fun collectionMedia(id: String): String {
+        require(id.matches(Regex("^[a-zA-Z0-9]+$"))) {
+            "Collection ID must contain only alphanumeric characters"
+        }
+        return "$PHOTOS_BASE/collections/$id"
+    }
 }

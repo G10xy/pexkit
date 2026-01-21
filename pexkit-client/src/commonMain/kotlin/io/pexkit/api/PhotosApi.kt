@@ -38,6 +38,9 @@ public class PhotosApi internal constructor(
         filters: PhotoFilters = PhotoFilters(),
         pagination: PaginationParams = PaginationParams(),
     ): PexKitResult<PaginatedResponse<Photo>> {
+        require(query.isNotBlank()) { "Search query cannot be blank" }
+        require(query.length <= 200) { "Search query cannot exceed 200 characters" }
+
         return executor.get<PhotosApiResponse>(Endpoints.PHOTOS_SEARCH) {
             parameter("query", query)
             parameter("page", pagination.page)

@@ -37,5 +37,9 @@ public data class Video(
  * Calculates the aspect ratio of the video.
  *
  * @return Width divided by height as a float.
+ * @throws IllegalStateException if height is less than or equal to zero.
  */
-public fun Video.aspectRatio(): Float = width.toFloat() / height
+public fun Video.aspectRatio(): Float {
+    check(height > 0) { "Cannot calculate aspect ratio: height must be greater than zero" }
+    return width.toFloat() / height
+}

@@ -37,5 +37,9 @@ public data class Photo(
  * Calculates the aspect ratio of the photo.
  *
  * @return Width divided by height as a float.
+ * @throws IllegalStateException if height is less than or equal to zero.
  */
-public fun Photo.aspectRatio(): Float = width.toFloat() / height
+public fun Photo.aspectRatio(): Float {
+    check(height > 0) { "Cannot calculate aspect ratio: height must be greater than zero" }
+    return width.toFloat() / height
+}

@@ -92,7 +92,9 @@ public fun PexKitError.toException(): PexKitException = PexKitException(this)
  *
  * This is provided for interoperability with code that expects exceptions.
  * Prefer using [PexKitResult] pattern matching when possible.
+ *
+ * For [PexKitError.NetworkError], the original exception is preserved as the cause.
  */
 public class PexKitException(
     public val error: PexKitError,
-) : Exception(error.message)
+) : Exception(error.message, (error as? PexKitError.NetworkError)?.cause)

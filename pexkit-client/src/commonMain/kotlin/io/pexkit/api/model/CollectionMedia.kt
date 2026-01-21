@@ -57,11 +57,30 @@ public sealed interface CollectionMedia {
     }
 
     /**
+     * An unknown media type in a collection.
+     *
+     * This is returned when the API returns a media type that is not recognized.
+     * This prevents data loss when the API introduces new media types.
+     *
+     * @property originalType The original type string from the API.
+     */
+    public data class Unknown(
+        override val id: Long,
+        override val width: Int,
+        override val height: Int,
+        override val url: String,
+        val originalType: String,
+    ) : CollectionMedia {
+        override val type: Type = Type.UNKNOWN
+    }
+
+    /**
      * Media type enum.
      */
     public enum class Type {
         PHOTO,
         VIDEO,
+        UNKNOWN,
     }
 }
 
@@ -74,3 +93,8 @@ public fun CollectionMedia.asPhoto(): CollectionMedia.PhotoMedia? = this as? Col
  * Returns this media as a [CollectionMedia.VideoMedia] if it is a video, null otherwise.
  */
 public fun CollectionMedia.asVideo(): CollectionMedia.VideoMedia? = this as? CollectionMedia.VideoMedia
+
+/**
+ * Returns this media as a [CollectionMedia.Unknown] if it is an unknown type, null otherwise.
+ */
+public fun CollectionMedia.asUnknown(): CollectionMedia.Unknown? = this as? CollectionMedia.Unknown

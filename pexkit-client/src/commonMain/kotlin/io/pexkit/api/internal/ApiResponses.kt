@@ -169,6 +169,7 @@ internal data class VideoPictureInternal(
 
 /**
  * Converts a raw API media item to the public CollectionMedia type.
+ * Returns [CollectionMedia.Unknown] for unrecognized media types instead of null.
  */
 internal fun CollectionMediaItem.toCollectionMedia(): CollectionMedia? {
     return when (type) {
@@ -198,7 +199,13 @@ internal fun CollectionMediaItem.toCollectionMedia(): CollectionMedia? {
             videoFiles = videoFiles?.map { it.toVideoFile() } ?: emptyList(),
             videoPictures = videoPictures?.map { it.toVideoPicture() } ?: emptyList(),
         )
-        else -> null
+        else -> CollectionMedia.Unknown(
+            id = id,
+            width = width,
+            height = height,
+            url = url,
+            originalType = type,
+        )
     }
 }
 

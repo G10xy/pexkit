@@ -9,6 +9,7 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.logging.SIMPLE
 import io.ktor.client.request.header
+import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import io.pexkit.api.LogLevel
 import io.pexkit.api.PexKitConfig
@@ -51,14 +52,7 @@ private fun io.ktor.client.HttpClientConfig<*>.configureClient(config: PexKitCon
                 LogLevel.HEADERS -> KtorLogLevel.HEADERS
                 LogLevel.BODY -> KtorLogLevel.BODY
             }
+            sanitizeHeader { header -> header == HttpHeaders.Authorization }
         }
     }
-}
-
-/**
- * JSON instance configured for Pexels API responses.
- */
-internal val pexKitJson = Json {
-    ignoreUnknownKeys = true
-    isLenient = true
 }

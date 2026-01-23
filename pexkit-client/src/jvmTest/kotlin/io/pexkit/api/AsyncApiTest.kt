@@ -8,6 +8,10 @@ import io.ktor.http.headersOf
 import io.pexkit.api.async.PexKitAsync
 import io.pexkit.api.response.PexKitException
 import java.util.concurrent.ExecutionException
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -16,7 +20,6 @@ import kotlin.test.assertTrue
 
 class AsyncApiTest {
 
-    // Helper to create an async client with mock response
     private fun createAsyncClientWithResponse(
         body: String,
         statusCode: HttpStatusCode = HttpStatusCode.OK,
@@ -39,14 +42,12 @@ class AsyncApiTest {
         }
     }
 
-    // ===== Photos API Tests =====
-
     @Test
     fun `async search returns CompletableFuture that resolves`() {
         val client = createAsyncClientWithResponse(MockResponses.PHOTOS_SEARCH)
 
         val future = client.photos.search("nature")
-        val result = future.get() // Blocking wait for result
+        val result = future.get()
 
         assertEquals(1, result.data.size)
         assertEquals(MockData.photo.id, result.data.first().id)
@@ -78,7 +79,6 @@ class AsyncApiTest {
         client.close()
     }
 
-    // ===== Videos API Tests =====
 
     @Test
     fun `async videos search returns CompletableFuture that resolves`() {
@@ -116,8 +116,6 @@ class AsyncApiTest {
         client.close()
     }
 
-    // ===== Collections API Tests =====
-
     @Test
     fun `async collections featured returns CompletableFuture that resolves`() {
         val client = createAsyncClientWithResponse(MockResponses.COLLECTIONS_LIST)
@@ -154,7 +152,6 @@ class AsyncApiTest {
         client.close()
     }
 
-    // ===== Error Handling Tests =====
 
     @Test
     fun `async API completes exceptionally on 401 Unauthorized`() {
@@ -220,7 +217,6 @@ class AsyncApiTest {
         client.close()
     }
 
-    // ===== AutoCloseable Tests =====
 
     @Test
     fun `AutoCloseable works with use block`() {
@@ -271,6 +267,171 @@ class AsyncApiTest {
         assertNotNull(client.photos)
         assertNotNull(client.videos)
         assertNotNull(client.collections)
+
+        client.close()
+    }
+
+    @Test
+    fun `client can be created with custom executor`() {
+        val mockEngine = MockEngine {
+            respond(
+                content = MockResponses.PHOTOS_SEARCH,
+                status = HttpStatusCode.OK,
+                headers = headersOf(
+                    HttpHeaders.ContentType to listOf("application/json"),
+                    "X-Ratelimit-Limit" to listOf("200"),
+                    "X-Ratelimit-Remaining" to listOf("199"),
+                    "X-Ratelimit-Reset" to listOf("1234567890"),
+                ),
+            )
+        }
+
+        val customExecutor = Executors.newSingleThreadExecutor()
+
+        val client = PexKitAsync.create(
+            {
+                apiKey = "test-key"
+                httpClientEngine = mockEngine
+            },
+            customExecutor,
+        )
+
+        val result = client.photos.search("nature").get()
+        assertEquals(1, result.data.size)
+
+        client.close()
+    }
+
+    @Test
+    fun `custom executor is used for async operations`() {
+        val mockEngine = MockEngine {
+            respond(
+                content = MockResponses.PHOTOS_SEARCH,
+                status = HttpStatusCode.OK,
+                headers = headersOf(
+                    HttpHeaders.ContentType to listOf("application/json"),
+                    "X-Ratelimit-Limit" to listOf("200"),
+                    "X-Ratelimit-Remaining" to listOf("199"),
+                    "X-Ratelimit-Reset" to listOf("1234567890"),
+                ),
+            )
+        }
+
+        val taskCount = AtomicInteger(0)
+        val customExecutor = Executors.newSingleThreadExecutor { runnable ->
+            Thread {
+                taskCount.incrementAndGet()
+                runnable.run()
+            }
+        }
+
+        val client = PexKitAsync.create(
+            {
+                apiKey = "test-key"
+                httpClientEngine = mockEngine
+            },
+            customExecutor,
+        )
+
+        client.photos.search("nature").get()
+        assertTrue(taskCount.get() > 0, "Custom executor should have been used")
+        client.close()
+    }
+
+    @Test
+    fun `custom executor is shut down when client is closed`() {
+        val mockEngine = MockEngine {
+            respond(
+                content = MockResponses.PHOTOS_SEARCH,
+                status = HttpStatusCode.OK,
+                headers = headersOf(
+                    HttpHeaders.ContentType to listOf("application/json"),
+                    "X-Ratelimit-Limit" to listOf("200"),
+                    "X-Ratelimit-Remaining" to listOf("199"),
+                    "X-Ratelimit-Reset" to listOf("1234567890"),
+                ),
+            )
+        }
+
+        val customExecutor = Executors.newFixedThreadPool(2)
+
+        val client = PexKitAsync.create(
+            {
+                apiKey = "test-key"
+                httpClientEngine = mockEngine
+            },
+            customExecutor,
+        )
+
+        // Executor should be running
+        assertTrue(!customExecutor.isShutdown)
+
+        client.close()
+
+        // Executor should be shut down after close
+        assertTrue(customExecutor.isShutdown)
+    }
+
+    @Test
+    fun `client works with cached thread pool executor`() {
+        val mockEngine = MockEngine {
+            respond(
+                content = MockResponses.PHOTOS_SEARCH,
+                status = HttpStatusCode.OK,
+                headers = headersOf(
+                    HttpHeaders.ContentType to listOf("application/json"),
+                    "X-Ratelimit-Limit" to listOf("200"),
+                    "X-Ratelimit-Remaining" to listOf("199"),
+                    "X-Ratelimit-Reset" to listOf("1234567890"),
+                ),
+            )
+        }
+
+        val cachedExecutor = Executors.newCachedThreadPool()
+
+        val client = PexKitAsync.create(
+            {
+                apiKey = "test-key"
+                httpClientEngine = mockEngine
+            },
+            cachedExecutor,
+        )
+
+        val result = client.photos.search("nature").get()
+        assertEquals(1, result.data.size)
+        client.close()
+    }
+
+    @Test
+    fun `client works with single thread executor for sequential processing`() {
+        val mockEngine = MockEngine {
+            respond(
+                content = MockResponses.PHOTOS_SEARCH,
+                status = HttpStatusCode.OK,
+                headers = headersOf(
+                    HttpHeaders.ContentType to listOf("application/json"),
+                    "X-Ratelimit-Limit" to listOf("200"),
+                    "X-Ratelimit-Remaining" to listOf("199"),
+                    "X-Ratelimit-Reset" to listOf("1234567890"),
+                ),
+            )
+        }
+
+        val singleThreadExecutor = Executors.newSingleThreadExecutor()
+
+        val client = PexKitAsync.create(
+            {
+                apiKey = "test-key"
+                httpClientEngine = mockEngine
+            },
+            singleThreadExecutor,
+        )
+
+        val result1 = client.photos.search("nature").get()
+        val result2 = client.photos.search("ocean").get()
+
+        assertEquals(1, result1.data.size)
+        assertEquals(1, result2.data.size)
 
         client.close()
     }

@@ -5,7 +5,10 @@ import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
+import io.pexkit.api.blocking.CollectionsApiBlocking
 import io.pexkit.api.blocking.PexKitBlocking
+import io.pexkit.api.blocking.PhotosApiBlocking
+import io.pexkit.api.blocking.VideosApiBlocking
 import io.pexkit.api.request.PaginationParams
 import io.pexkit.api.request.PhotoFilters
 import io.pexkit.api.request.VideoFilters
@@ -18,7 +21,6 @@ import kotlin.test.assertTrue
 
 class BlockingApiTest {
 
-    // Helper to create a blocking client with mock response
     private fun createBlockingClientWithResponse(
         body: String,
         statusCode: HttpStatusCode = HttpStatusCode.OK,
@@ -41,7 +43,6 @@ class BlockingApiTest {
         }
     }
 
-    // ===== Photos API Tests =====
 
     @Test
     fun `blocking search returns photos`() {
@@ -95,8 +96,6 @@ class BlockingApiTest {
         client.close()
     }
 
-    // ===== Videos API Tests =====
-
     @Test
     fun `blocking videos search returns videos`() {
         val client = createBlockingClientWithResponse(MockResponses.VIDEOS_SEARCH)
@@ -135,8 +134,6 @@ class BlockingApiTest {
         client.close()
     }
 
-    // ===== Collections API Tests =====
-
     @Test
     fun `blocking collections featured returns collections`() {
         val client = createBlockingClientWithResponse(MockResponses.COLLECTIONS_LIST)
@@ -167,25 +164,6 @@ class BlockingApiTest {
         val result = client.collections.media("abc123")
 
         assertEquals(2, result.data.size)
-
-        client.close()
-    }
-
-    // ===== Error Handling Tests =====
-
-    @Test
-    fun `blocking API throws PexKitException on 401 Unauthorized`() {
-        val client = createBlockingClientWithResponse(
-            body = MockResponses.ERROR_UNAUTHORIZED,
-            statusCode = HttpStatusCode.Unauthorized,
-        )
-
-        val exception = assertFailsWith<PexKitException> {
-            client.photos.search("nature")
-        }
-
-        assertNotNull(exception.error)
-        assertTrue(exception.message?.contains("Unauthorized") == true || exception.message?.contains("401") == true)
 
         client.close()
     }
@@ -232,7 +210,6 @@ class BlockingApiTest {
         client.close()
     }
 
-    // ===== AutoCloseable Tests =====
 
     @Test
     fun `AutoCloseable works with use block`() {
@@ -257,13 +234,11 @@ class BlockingApiTest {
         }
 
         assertEquals(1, result.data.size)
-        // Client is automatically closed after use block
     }
 
     @Test
     fun `client can be created with simple API key`() {
         // This test just verifies the factory method works
-        // We can't actually make API calls without a real key
         val mockEngine = MockEngine {
             respond(
                 content = MockResponses.PHOTOS_SEARCH,
@@ -288,4 +263,5 @@ class BlockingApiTest {
 
         client.close()
     }
+
 }

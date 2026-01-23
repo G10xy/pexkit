@@ -26,11 +26,16 @@ public sealed interface CollectionMedia {
         override val width: Int,
         override val height: Int,
         override val url: String,
+        /** Photographer name. Empty string if not provided by the API. */
         val photographer: String,
+        /** Photographer profile URL. Empty string if not provided by the API. */
         val photographerUrl: String,
+        /** Photographer ID. Returns `0` if not provided by the API. */
         val photographerId: Long,
+        /** Average color as hex string. Empty string if not provided by the API. */
         val avgColor: String,
         val src: PhotoSource,
+        /** Alt text description. Empty string if not provided by the API. */
         val alt: String,
         val liked: Boolean,
     ) : CollectionMedia {
@@ -45,12 +50,17 @@ public sealed interface CollectionMedia {
         override val width: Int,
         override val height: Int,
         override val url: String,
+        /** Thumbnail image URL. Empty string if not provided by the API. */
         val image: String,
         val fullRes: String?,
+        /** Video tags. Empty list if not provided by the API. */
         val tags: List<String>,
+        /** Video duration in seconds. Returns `0` if not provided by the API. */
         val duration: Int,
         val user: User,
+        /** Available video files. Empty list if not provided by the API. */
         val videoFiles: List<VideoFile>,
+        /** Video preview pictures. Empty list if not provided by the API. */
         val videoPictures: List<VideoPicture>,
     ) : CollectionMedia {
         override val type: Type = Type.VIDEO
@@ -74,9 +84,6 @@ public sealed interface CollectionMedia {
         override val type: Type = Type.UNKNOWN
     }
 
-    /**
-     * Media type enum.
-     */
     public enum class Type {
         PHOTO,
         VIDEO,

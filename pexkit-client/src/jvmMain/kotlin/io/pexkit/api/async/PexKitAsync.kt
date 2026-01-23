@@ -76,15 +76,37 @@ public class PexKitAsync private constructor(
         }
 
         /**
-         * Creates a PexKitAsync client using the DSL builder.
+         * Creates a PexKitAsync client using the DSL builder with a default bounded thread pool.
+         *
+         * The default executor is a fixed thread pool sized to the number of available processors
+         * (minimum 2 threads). For custom thread pool configuration, use the overloaded alternative.
          *
          * @param block Configuration block.
          * @return A configured [PexKitAsync] instance.
          */
         @JvmStatic
         public fun create(block: PexKitConfig.Builder.() -> Unit): PexKitAsync {
+            val executor = Executors.newFixedThreadPool(
+                Runtime.getRuntime().availableProcessors().coerceAtLeast(2)
+            )
+            return create(block, executor)
+        }
+
+        /**
+         * Creates a PexKitAsync client using the DSL builder with a custom executor.
+         *
+         * **Important:** The provided executor will be shut down when [close] is called.
+         *
+         * @param block Configuration block.
+         * @param executor Custom executor service for async operations.
+         * @return A configured [PexKitAsync] instance.
+         */
+        @JvmStatic
+        public fun create(
+            block: PexKitConfig.Builder.() -> Unit,
+            executor: ExecutorService,
+        ): PexKitAsync {
             val delegate = PexKit(block)
-            val executor = Executors.newCachedThreadPool()
             return PexKitAsync(delegate, executor)
         }
     }

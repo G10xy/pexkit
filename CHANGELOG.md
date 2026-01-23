@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased] - 23-01-2026
 
 ### Added
 
@@ -20,12 +20,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `@JvmOverloads` on `PhotoFilters`, `VideoFilters`, `PaginationParams` constructors
   - `@JvmStatic` on `PhotoFilters.withColor()` and `PhotoFilters.withHexColor()`
   - `@JvmStatic` on `PexKitBlocking.create()` factory methods
+- **Unknown media type support** - `CollectionMedia.Unknown` type preserves unrecognized media types from the API instead of silently dropping them
+  - `originalType` property contains the raw type string from the API
+  - `asUnknown()` extension for safe casting
+- **Custom executor support** - `PexKitAsync.create()` now accepts a custom `ExecutorService` for thread pool control
+- **Input validation**
+  - Search queries validated for blank and max length (200 characters)
+  - Collection IDs validated to contain only alphanumeric characters (prevents path traversal)
+  - `aspectRatio()` throws `IllegalStateException` when height is zero or negative
+- **`@Throws(PexKitException::class)`** annotations on all blocking API methods for Java interop
+
+### Changed
+
+- **Bounded thread pool** - `PexKitAsync` now uses a bounded cached thread pool instead of unbounded
+- **Exception cause preservation** - `PexKitException` now preserves the original exception cause chain for `NetworkError`
+
 
 ### Technical Details
 
 - JVM: CIO engine, Java 21+
+- Refactored all test method names to backtick naming style for readability
 
-## [0.1.0] - 15-01-2026
+## [Unreleased] - 15-01-2026
 
 ### Added
 

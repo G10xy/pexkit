@@ -5,8 +5,10 @@ import io.pexkit.api.model.Video
 import io.pexkit.api.request.PaginationParams
 import io.pexkit.api.request.VideoFilters
 import io.pexkit.api.response.PaginatedResponse
+import io.pexkit.api.response.PexKitException
 import io.pexkit.api.response.getOrThrow
 import kotlinx.coroutines.runBlocking
+import kotlin.jvm.Throws
 
 /**
  * Blocking wrapper for [VideosApi] that provides Java-friendly APIs.
@@ -28,6 +30,7 @@ public class VideosApiBlocking internal constructor(
      * @throws io.pexkit.api.response.PexKitException on API errors.
      */
     @JvmOverloads
+    @Throws(PexKitException::class)
     public fun search(
         query: String,
         filters: VideoFilters = VideoFilters(),
@@ -45,6 +48,7 @@ public class VideosApiBlocking internal constructor(
      * @throws io.pexkit.api.response.PexKitException on API errors.
      */
     @JvmOverloads
+    @Throws(PexKitException::class)
     public fun popular(
         filters: VideoFilters = VideoFilters(),
         pagination: PaginationParams = PaginationParams(),
@@ -59,6 +63,7 @@ public class VideosApiBlocking internal constructor(
      * @return The video.
      * @throws io.pexkit.api.response.PexKitException on API errors.
      */
+    @Throws(PexKitException::class)
     public fun get(id: Long): Video = runBlocking {
         delegate.get(id).getOrThrow()
     }

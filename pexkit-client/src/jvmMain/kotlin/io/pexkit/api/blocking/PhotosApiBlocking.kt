@@ -5,8 +5,10 @@ import io.pexkit.api.model.Photo
 import io.pexkit.api.request.PaginationParams
 import io.pexkit.api.request.PhotoFilters
 import io.pexkit.api.response.PaginatedResponse
+import io.pexkit.api.response.PexKitException
 import io.pexkit.api.response.getOrThrow
 import kotlinx.coroutines.runBlocking
+import kotlin.jvm.Throws
 
 /**
  * Blocking wrapper for [PhotosApi] that provides Java-friendly APIs.
@@ -28,6 +30,7 @@ public class PhotosApiBlocking internal constructor(
      * @throws io.pexkit.api.response.PexKitException on API errors.
      */
     @JvmOverloads
+    @Throws(PexKitException::class)
     public fun search(
         query: String,
         filters: PhotoFilters = PhotoFilters(),
@@ -44,6 +47,7 @@ public class PhotosApiBlocking internal constructor(
      * @throws io.pexkit.api.response.PexKitException on API errors.
      */
     @JvmOverloads
+    @Throws(PexKitException::class)
     public fun curated(
         pagination: PaginationParams = PaginationParams(),
     ): PaginatedResponse<Photo> = runBlocking {
@@ -57,6 +61,7 @@ public class PhotosApiBlocking internal constructor(
      * @return The photo.
      * @throws io.pexkit.api.response.PexKitException on API errors.
      */
+    @Throws(PexKitException::class)
     public fun get(id: Long): Photo = runBlocking {
         delegate.get(id).getOrThrow()
     }

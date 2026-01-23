@@ -6,8 +6,10 @@ import io.pexkit.api.model.CollectionMedia
 import io.pexkit.api.request.MediaType
 import io.pexkit.api.request.PaginationParams
 import io.pexkit.api.response.PaginatedResponse
+import io.pexkit.api.response.PexKitException
 import io.pexkit.api.response.getOrThrow
 import kotlinx.coroutines.runBlocking
+import kotlin.jvm.Throws
 
 /**
  * Blocking wrapper for [CollectionsApi] that provides Java-friendly APIs.
@@ -27,6 +29,7 @@ public class CollectionsApiBlocking internal constructor(
      * @throws io.pexkit.api.response.PexKitException on API errors.
      */
     @JvmOverloads
+    @Throws(PexKitException::class)
     public fun featured(
         pagination: PaginationParams = PaginationParams(),
     ): PaginatedResponse<Collection> = runBlocking {
@@ -41,6 +44,7 @@ public class CollectionsApiBlocking internal constructor(
      * @throws io.pexkit.api.response.PexKitException on API errors.
      */
     @JvmOverloads
+    @Throws(PexKitException::class)
     public fun my(
         pagination: PaginationParams = PaginationParams(),
     ): PaginatedResponse<Collection> = runBlocking {
@@ -57,6 +61,7 @@ public class CollectionsApiBlocking internal constructor(
      * @throws io.pexkit.api.response.PexKitException on API errors.
      */
     @JvmOverloads
+    @Throws(PexKitException::class)
     public fun media(
         id: String,
         type: MediaType? = null,

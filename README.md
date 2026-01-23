@@ -4,6 +4,7 @@ A Kotlin Multiplatform client library for the [Pexels API](https://www.pexels.co
 
 PexKit provides a type-safe, coroutine-based API to search and retrieve high-quality stock photos and videos from Pexels.
 
+
 ## Features
 
 - **Kotlin Multiplatform** - Works on Android, iOS, and JVM from a single codebase
@@ -14,10 +15,10 @@ PexKit provides a type-safe, coroutine-based API to search and retrieve high-qua
 - **Rate limit aware** - Every response includes rate limit information
 - **Minimal dependencies** - Built on Ktor and kotlinx.serialization
 
-## Installation
+<details>
+<summary><h2>Installation</h2></summary>
 
 Add the dependency to your `build.gradle.kts`:
-
 ```kotlin
 // In your shared module or app module
 dependencies {
@@ -32,8 +33,9 @@ dependencies {
 **iOS** - No additional setup required. PexKit uses the Darwin (URLSession) engine.
 
 **JVM** - No additional setup required. PexKit uses the CIO (Coroutine I/O) engine. Requires Java 21+.
-
-## Quick Start
+</details>
+<details>
+<summary><h2>Quick Start</h2></summary>
 
 ### 1. Get your API key
 
@@ -80,7 +82,10 @@ when (val result = pexkit.photos.search("nature")) {
 pexkit.close()
 ```
 
-## API Reference
+</details>
+
+<details>
+<summary><h2>API Reference</h2></summary>
 
 ### Photos
 
@@ -183,7 +188,10 @@ when (val result = pexkit.collections.media("abc123")) {
 - `private` - Whether the collection is private
 - `mediaCount`, `photosCount`, `videosCount` - Media counts
 
-## Pagination
+</details>
+
+<details>
+<summary><h2>Pagination</h2></summary>
 
 All list endpoints return paginated responses:
 
@@ -207,7 +215,10 @@ if (result is PexKitResult.Success) {
 }
 ```
 
-## Error Handling
+</details>
+
+<details>
+<summary><h2>Error Handling</h2></summary>
 
 PexKit uses a `PexKitResult` sealed class instead of throwing exceptions:
 
@@ -276,7 +287,10 @@ result
     .onFailure { error -> showError(error) }
 ```
 
-## Configuration Options
+</details>
+
+<details>
+<summary><h2>Configuration Options</h2></summary>
 
 ```kotlin
 val pexkit = PexKit {
@@ -297,7 +311,10 @@ val pexkit = PexKit {
 }
 ```
 
-## Rate Limits
+</details>
+
+<details>
+<summary><h2>Rate Limits</h2></summary>
 
 Pexels API has rate limits (default: 200 requests/hour). Every successful response includes rate limit information:
 
@@ -318,7 +335,10 @@ when (val result = pexkit.photos.search("nature")) {
 }
 ```
 
-## Filters Reference
+</details>
+
+<details>
+<summary><h2>Filters Reference</h2></summary>
 
 ### Photo Filters
 
@@ -341,7 +361,10 @@ when (val result = pexkit.photos.search("nature")) {
 | `minDuration` | Minimum duration in seconds |
 | `maxDuration` | Maximum duration in seconds |
 
-## Backend Usage (JVM)
+</details>
+
+<details>
+<summary><h2>Backend Usage (JVM)</h2></summary>
 
 PexKit provides full support for JVM backends, including Spring Boot, Ktor Server, and standalone applications. Choose between coroutine-based, blocking, or async APIs based on your needs.
 
@@ -520,17 +543,36 @@ PexKit and PexKitBlocking instances are **thread-safe** and can be shared across
 - Call `close()` when your application shuts down to release resources
 - For Spring applications, use `@PreDestroy` to ensure proper cleanup
 
+### Threading Considerations
+
+#### Blocking API (`PexKitBlocking`)
+
+The blocking API uses `runBlocking` internally to bridge suspend functions to blocking calls. Be aware of the following:
+
+- **Do not call from Android main thread:** Calling blocking methods on the Android main (UI) thread will cause an ANR (Application Not Responding) error.
+- **Do not call from coroutine dispatchers:** Calling from within a coroutine context (e.g., `Dispatchers.Default` or `Dispatchers.IO`) may cause deadlocks in some configurations.
+- **Recommended:** Use the suspend-based `PexKit` API when working with coroutines, or `PexKitAsync` for Java's `CompletableFuture` pattern.
+
+#### Async API (`PexKitAsync`)
+
+The async API returns `CompletableFuture` for Java interoperability. Note the following limitation:
+
+- **Cancellation does not stop HTTP requests:** Cancelling a `CompletableFuture` returned by this API does **not** cancel the underlying HTTP request. The request will continue to completion even if the future is cancelled. This is a limitation of bridging coroutines to `CompletableFuture`.
+- **For proper cancellation:** Use the suspend-based `PexKit` API with coroutines, which supports structured concurrency and cancellation.
+
 ### API Comparison
 
 | API Style | Class | Returns | Error Handling |
 |-----------|-------|---------|----------------|
 | Coroutines (Kotlin) | `PexKit` | `PexKitResult<T>` | Pattern matching |
 | Blocking (Kotlin/Java) | `PexKitBlocking` | `T` directly | Throws `PexKitException` |
-| Async (Java) | `PexKitBlocking.*Async()` | `CompletableFuture<T>` | `.exceptionally()` / `.handle()` |
+| Async (Java) | `PexKitAsync` | `CompletableFuture<T>` | `.exceptionally()` / `.handle()` |
 
-## Official Documentation
+</details>
+
+
+<summary><h2>Official Documentation</h2></summary>
 
 For complete API documentation, rate limit details, and terms of use, visit the official Pexels API documentation:
-
 **[Pexels API Documentation](https://www.pexels.com/api/documentation/)**
 

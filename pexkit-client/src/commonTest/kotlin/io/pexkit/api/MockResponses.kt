@@ -140,6 +140,86 @@ internal object MockResponses {
         )
     )
 
+    val COLLECTION_MEDIA_WITH_UNKNOWN: String = json.encodeToString(
+        CollectionMediaApiResponse(
+            id = "abc123",
+            media = listOf(
+                // Photo
+                CollectionMediaItem(
+                    type = "Photo",
+                    id = MockData.photo.id,
+                    width = MockData.photo.width,
+                    height = MockData.photo.height,
+                    url = MockData.photo.url,
+                    photographer = MockData.photo.photographer,
+                    photographerUrl = MockData.photo.photographerUrl,
+                    photographerId = MockData.photo.photographerId,
+                    avgColor = MockData.photo.avgColor,
+                    src = PhotoSourceInternal(
+                        original = MockData.photoSource.original,
+                        large2x = MockData.photoSource.large2x,
+                        large = MockData.photoSource.large,
+                        medium = MockData.photoSource.medium,
+                        small = MockData.photoSource.small,
+                        portrait = MockData.photoSource.portrait,
+                        landscape = MockData.photoSource.landscape,
+                        tiny = MockData.photoSource.tiny,
+                    ),
+                    alt = MockData.photo.alt,
+                    liked = MockData.photo.liked,
+                ),
+                // Video
+                CollectionMediaItem(
+                    type = "Video",
+                    id = MockData.video.id,
+                    width = MockData.video.width,
+                    height = MockData.video.height,
+                    url = MockData.video.url,
+                    image = MockData.video.image,
+                    fullRes = MockData.video.fullRes,
+                    tags = MockData.video.tags,
+                    duration = MockData.video.duration,
+                    user = UserInternal(
+                        id = MockData.user.id,
+                        name = MockData.user.name,
+                        url = MockData.user.url,
+                    ),
+                    videoFiles = listOf(
+                        VideoFileInternal(
+                            id = MockData.videoFileHd.id,
+                            quality = MockData.videoFileHd.quality,
+                            fileType = MockData.videoFileHd.fileType,
+                            width = MockData.videoFileHd.width,
+                            height = MockData.videoFileHd.height,
+                            fps = MockData.videoFileHd.fps,
+                            link = MockData.videoFileHd.link,
+                        ),
+                    ),
+                    videoPictures = listOf(
+                        VideoPictureInternal(
+                            id = MockData.videoPicture.id,
+                            picture = MockData.videoPicture.picture,
+                            nr = MockData.videoPicture.nr,
+                        ),
+                    ),
+                ),
+                // Unknown type (e.g., a new "Audio" type the API might introduce)
+                CollectionMediaItem(
+                    type = "Audio",
+                    id = 999L,
+                    width = 0,
+                    height = 0,
+                    url = "https://www.pexels.com/audio/999/",
+                ),
+            ),
+            page = 1,
+            perPage = 15,
+            totalResults = 3,
+            nextPage = null,
+            prevPage = null,
+        )
+    )
+
     const val ERROR_UNAUTHORIZED = """{"error": "Unauthorized"}"""
     const val ERROR_NOT_FOUND = """{"error": "Not Found"}"""
 }

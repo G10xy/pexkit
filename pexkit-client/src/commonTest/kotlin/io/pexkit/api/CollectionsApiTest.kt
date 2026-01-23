@@ -5,15 +5,21 @@ import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
+import io.pexkit.api.internal.CollectionMediaApiResponse
 import io.pexkit.api.model.CollectionMedia
+import io.pexkit.api.model.asPhoto
+import io.pexkit.api.model.asUnknown
+import io.pexkit.api.model.asVideo
 import io.pexkit.api.request.MediaType
 import io.pexkit.api.request.PaginationParams
 import io.pexkit.api.response.PexKitResult
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
@@ -168,4 +174,67 @@ class CollectionsApiTest {
 
         client.close()
     }
+
+
+    @Test
+    fun unknownMediaTypeIsPreserved() {
+        val json = Json { ignoreUnknownKeys = true }
+        val response = json.decodeFromString<CollectionMediaApiResponse>(
+            MockResponses.COLLECTION_MEDIA_WITH_UNKNOWN
+        )
+
+        val paginatedResponse = response.toPaginatedResponse()
+        assertEquals(3, paginatedResponse.data.size)
+
+        // First item is Photo
+        val photo = paginatedResponse.data[0]
+        assertIs<CollectionMedia.PhotoMedia>(photo)
+        assertEquals(CollectionMedia.Type.PHOTO, photo.type)
+
+        // Second item is Video
+        val video = paginatedResponse.data[1]
+        assertIs<CollectionMedia.VideoMedia>(video)
+        assertEquals(CollectionMedia.Type.VIDEO, video.type)
+
+        // Third item is Unknown
+        val unknown = paginatedResponse.data[2]
+        assertIs<CollectionMedia.Unknown>(unknown)
+        assertEquals(CollectionMedia.Type.UNKNOWN, unknown.type)
+        assertEquals("Audio", unknown.originalType)
+        assertEquals(999L, unknown.id)
+    }
+
+    @Test
+    fun unknownMediaTypeHasCorrectProperties() {
+        val unknown = CollectionMedia.Unknown(
+            id = 123L,
+            width = 800,
+            height = 600,
+            url = "https://example.com/media/123",
+            originalType = "Podcast",
+        )
+
+        assertEquals(123L, unknown.id)
+        assertEquals(800, unknown.width)
+        assertEquals(600, unknown.height)
+        assertEquals("https://example.com/media/123", unknown.url)
+        assertEquals("Podcast", unknown.originalType)
+        assertEquals(CollectionMedia.Type.UNKNOWN, unknown.type)
+    }
+
+    @Test
+    fun asUnknownExtensionReturnsCorrectType() {
+        val unknown: CollectionMedia = CollectionMedia.Unknown(
+            id = 1L,
+            width = 100,
+            height = 100,
+            url = "https://example.com",
+            originalType = "NewType",
+        )
+
+        assertNotNull(unknown.asUnknown())
+        assertNull(unknown.asPhoto())
+        assertNull(unknown.asVideo())
+    }
+
 }

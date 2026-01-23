@@ -24,7 +24,7 @@ import kotlin.test.fail
 class ErrorHandlingTest {
 
     @Test
-    fun unauthorizedError() = runTest {
+    fun `returns Unauthorized error for 401 response`() = runTest {
         val client = createTestClientWithResponse(
             body = MockResponses.ERROR_UNAUTHORIZED,
             statusCode = HttpStatusCode.Unauthorized,
@@ -42,7 +42,7 @@ class ErrorHandlingTest {
     }
 
     @Test
-    fun forbiddenError() = runTest {
+    fun `returns Forbidden error for 403 response`() = runTest {
         val client = createTestClientWithResponse(
             body = "{}",
             statusCode = HttpStatusCode.Forbidden,
@@ -59,7 +59,7 @@ class ErrorHandlingTest {
     }
 
     @Test
-    fun notFoundError() = runTest {
+    fun `returns NotFound error for 404 response`() = runTest {
         val client = createTestClientWithResponse(
             body = MockResponses.ERROR_NOT_FOUND,
             statusCode = HttpStatusCode.NotFound,
@@ -77,7 +77,7 @@ class ErrorHandlingTest {
     }
 
     @Test
-    fun rateLimitedError() = runTest {
+    fun `returns RateLimited error with retryAfter for 429 response`() = runTest {
         val mockEngine = MockEngine {
             respond(
                 content = "{}",
@@ -108,7 +108,7 @@ class ErrorHandlingTest {
     }
 
     @Test
-    fun rateLimitedErrorWithoutRetryAfter() = runTest {
+    fun `returns RateLimited error with null retryAfter when header missing`() = runTest {
         val client = createTestClientWithResponse(
             body = "{}",
             statusCode = HttpStatusCode.TooManyRequests,
@@ -127,7 +127,7 @@ class ErrorHandlingTest {
     }
 
     @Test
-    fun serverError500() = runTest {
+    fun `returns ServerError for 500 response`() = runTest {
         val client = createTestClientWithResponse(
             body = "Internal Server Error",
             statusCode = HttpStatusCode.InternalServerError,
@@ -146,7 +146,7 @@ class ErrorHandlingTest {
     }
 
     @Test
-    fun serverError503() = runTest {
+    fun `returns ServerError for 503 response`() = runTest {
         val client = createTestClientWithResponse(
             body = "Service Unavailable",
             statusCode = HttpStatusCode.ServiceUnavailable,
@@ -165,7 +165,7 @@ class ErrorHandlingTest {
     }
 
     @Test
-    fun unknownError() = runTest {
+    fun `returns Unknown error for unexpected status code`() = runTest {
         val client = createTestClientWithResponse(
             body = "Bad Request: Invalid parameter",
             statusCode = HttpStatusCode.BadRequest,
@@ -184,7 +184,7 @@ class ErrorHandlingTest {
     }
 
     @Test
-    fun getOrNullReturnsNullOnFailure() = runTest {
+    fun `getOrNull returns null on failure`() = runTest {
         val client = createTestClientWithResponse(
             body = "{}",
             statusCode = HttpStatusCode.Unauthorized,
@@ -199,7 +199,7 @@ class ErrorHandlingTest {
     }
 
     @Test
-    fun getOrNullReturnsDataOnSuccess() = runTest {
+    fun `getOrNull returns data on success`() = runTest {
         val client = createTestClientWithResponse(MockResponses.PHOTOS_SEARCH)
 
         val result = client.photos.search("nature")
@@ -211,7 +211,7 @@ class ErrorHandlingTest {
     }
 
     @Test
-    fun getOrThrowThrowsOnFailure() = runTest {
+    fun `getOrThrow throws PexKitException on failure`() = runTest {
         val client = createTestClientWithResponse(
             body = "{}",
             statusCode = HttpStatusCode.Unauthorized,
@@ -227,7 +227,7 @@ class ErrorHandlingTest {
     }
 
     @Test
-    fun onSuccessCallbackExecuted() = runTest {
+    fun `onSuccess callback is executed on success`() = runTest {
         val client = createTestClientWithResponse(MockResponses.PHOTOS_SEARCH)
 
         var successCalled = false
@@ -240,7 +240,7 @@ class ErrorHandlingTest {
     }
 
     @Test
-    fun onFailureCallbackExecuted() = runTest {
+    fun `onFailure callback is executed on failure`() = runTest {
         val client = createTestClientWithResponse(
             body = "{}",
             statusCode = HttpStatusCode.Unauthorized,

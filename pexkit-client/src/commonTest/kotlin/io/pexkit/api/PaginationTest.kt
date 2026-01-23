@@ -15,7 +15,7 @@ import kotlin.test.fail
 class PaginationTest {
 
     @Test
-    fun firstPageHasNextButNoPrev() = runTest {
+    fun `first page has next but no prev`() = runTest {
         val client = createTestClientWithResponse(MockResponses.PHOTOS_SEARCH)
 
         when (val result = client.photos.search("nature")) {
@@ -33,7 +33,7 @@ class PaginationTest {
     }
 
     @Test
-    fun middlePageHasBothNextAndPrev() = runTest {
+    fun `middle page has both next and prev`() = runTest {
         val client = createTestClientWithResponse(MockResponses.PHOTOS_SEARCH_PAGE_2)
 
         when (val result = client.photos.search("nature", pagination = PaginationParams(page = 2))) {
@@ -51,7 +51,7 @@ class PaginationTest {
     }
 
     @Test
-    fun paginationParamsValidation() {
+    fun `PaginationParams accepts valid values`() {
         val validParams = PaginationParams(page = 1, perPage = 15)
         assertEquals(1, validParams.page)
         assertEquals(15, validParams.perPage)
@@ -64,7 +64,7 @@ class PaginationTest {
     }
 
     @Test
-    fun paginationParamsInvalidPage() {
+    fun `PaginationParams rejects invalid page values`() {
         assertFailsWith<IllegalArgumentException> {
             PaginationParams(page = 0)
         }
@@ -75,7 +75,7 @@ class PaginationTest {
     }
 
     @Test
-    fun paginationParamsInvalidPerPage() {
+    fun `PaginationParams rejects invalid perPage values`() {
         assertFailsWith<IllegalArgumentException> {
             PaginationParams(page = 1, perPage = 0)
         }
@@ -90,13 +90,13 @@ class PaginationTest {
     }
 
     @Test
-    fun paginationParamsNullPerPageUsesDefault() {
+    fun `PaginationParams accepts null perPage for default`() {
         val params = PaginationParams(page = 1, perPage = null)
         assertNull(params.perPage)
     }
 
     @Test
-    fun totalResultsReported() = runTest {
+    fun `response includes totalResults`() = runTest {
         val client = createTestClientWithResponse(MockResponses.PHOTOS_SEARCH)
 
         when (val result = client.photos.search("nature")) {
@@ -111,7 +111,7 @@ class PaginationTest {
     }
 
     @Test
-    fun perPageFromResponse() = runTest {
+    fun `response includes perPage from API`() = runTest {
         val client = createTestClientWithResponse(MockResponses.PHOTOS_SEARCH)
 
         when (val result = client.photos.search("nature")) {
@@ -125,7 +125,7 @@ class PaginationTest {
     }
 
     @Test
-    fun defaultPerPageFromConfig() = runTest {
+    fun `config defaultPerPage is used when perPage not specified`() = runTest {
         val client = PexKit {
             apiKey = "test-key"
             defaultPerPage = 25

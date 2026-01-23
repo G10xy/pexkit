@@ -18,7 +18,7 @@ import kotlin.test.fail
 class VideosApiTest {
 
     @Test
-    fun searchVideosReturnsSuccess() = runTest {
+    fun `search returns success with videos`() = runTest {
         val client = createTestClientWithResponse(MockResponses.VIDEOS_SEARCH)
 
         when (val result = client.videos.search("ocean")) {
@@ -36,7 +36,7 @@ class VideosApiTest {
     }
 
     @Test
-    fun searchVideosWithFilters() = runTest {
+    fun `search applies filters to request URL`() = runTest {
         var capturedUrl: String? = null
 
         val mockEngine = MockEngine { request ->
@@ -75,7 +75,7 @@ class VideosApiTest {
     }
 
     @Test
-    fun popularVideosReturnsSuccess() = runTest {
+    fun `popular returns success with videos`() = runTest {
         val client = createTestClientWithResponse(MockResponses.VIDEOS_SEARCH)
 
         when (val result = client.videos.popular()) {
@@ -89,7 +89,7 @@ class VideosApiTest {
     }
 
     @Test
-    fun popularVideosWithFilters() = runTest {
+    fun `popular applies filters to request URL`() = runTest {
         var capturedUrl: String? = null
 
         val mockEngine = MockEngine { request ->
@@ -121,7 +121,7 @@ class VideosApiTest {
     }
 
     @Test
-    fun getVideoByIdReturnsSuccess() = runTest {
+    fun `get by ID returns success with video`() = runTest {
         val client = createTestClientWithResponse(MockResponses.VIDEO)
 
         when (val result = client.videos.get(MockData.video.id)) {
@@ -139,7 +139,7 @@ class VideosApiTest {
     }
 
     @Test
-    fun videoFilesContainCorrectData() = runTest {
+    fun `video files contain correct data`() = runTest {
         val client = createTestClientWithResponse(MockResponses.VIDEO)
 
         when (val result = client.videos.get(MockData.video.id)) {

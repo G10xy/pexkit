@@ -26,7 +26,7 @@ import kotlin.test.fail
 class CollectionsApiTest {
 
     @Test
-    fun featuredCollectionsReturnsSuccess() = runTest {
+    fun `featured returns success with collections`() = runTest {
         val client = createTestClientWithResponse(MockResponses.COLLECTIONS_LIST)
 
         when (val result = client.collections.featured()) {
@@ -44,7 +44,7 @@ class CollectionsApiTest {
     }
 
     @Test
-    fun myCollectionsReturnsSuccess() = runTest {
+    fun `my returns success with collections`() = runTest {
         val client = createTestClientWithResponse(MockResponses.COLLECTIONS_LIST)
 
         when (val result = client.collections.my()) {
@@ -58,7 +58,7 @@ class CollectionsApiTest {
     }
 
     @Test
-    fun collectionMediaReturnsSuccess() = runTest {
+    fun `media returns success with collection media`() = runTest {
         val client = createTestClientWithResponse(MockResponses.COLLECTION_MEDIA)
 
         when (val result = client.collections.media(MockData.collection.id)) {
@@ -73,7 +73,7 @@ class CollectionsApiTest {
     }
 
     @Test
-    fun collectionMediaContainsPhotosAndVideos() = runTest {
+    fun `media contains both photos and videos`() = runTest {
         val client = createTestClientWithResponse(MockResponses.COLLECTION_MEDIA)
 
         when (val result = client.collections.media(MockData.collection.id)) {
@@ -99,7 +99,7 @@ class CollectionsApiTest {
     }
 
     @Test
-    fun collectionMediaWithTypeFilter() = runTest {
+    fun `media applies type filter to request URL`() = runTest {
         var capturedUrl: String? = null
 
         val mockEngine = MockEngine { request ->
@@ -125,7 +125,7 @@ class CollectionsApiTest {
     }
 
     @Test
-    fun collectionMediaWithPagination() = runTest {
+    fun `media applies pagination to request URL`() = runTest {
         var capturedUrl: String? = null
 
         val mockEngine = MockEngine { request ->
@@ -155,7 +155,7 @@ class CollectionsApiTest {
     }
 
     @Test
-    fun collectionDataIsCorrect() = runTest {
+    fun `collection data has all properties`() = runTest {
         val client = createTestClientWithResponse(MockResponses.COLLECTIONS_LIST)
 
         when (val result = client.collections.featured()) {
@@ -177,7 +177,7 @@ class CollectionsApiTest {
 
 
     @Test
-    fun unknownMediaTypeIsPreserved() {
+    fun `unknown media type is preserved when deserializing`() {
         val json = Json { ignoreUnknownKeys = true }
         val response = json.decodeFromString<CollectionMediaApiResponse>(
             MockResponses.COLLECTION_MEDIA_WITH_UNKNOWN
@@ -205,7 +205,7 @@ class CollectionsApiTest {
     }
 
     @Test
-    fun unknownMediaTypeHasCorrectProperties() {
+    fun `Unknown media type has correct properties`() {
         val unknown = CollectionMedia.Unknown(
             id = 123L,
             width = 800,
@@ -223,7 +223,7 @@ class CollectionsApiTest {
     }
 
     @Test
-    fun asUnknownExtensionReturnsCorrectType() {
+    fun `asUnknown extension returns correct type`() {
         val unknown: CollectionMedia = CollectionMedia.Unknown(
             id = 1L,
             width = 100,

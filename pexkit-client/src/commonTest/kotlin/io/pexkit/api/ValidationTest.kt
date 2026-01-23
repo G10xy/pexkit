@@ -1,21 +1,16 @@
 package io.pexkit.api
 
-import io.pexkit.api.internal.CollectionMediaApiResponse
 import io.pexkit.api.internal.Endpoints
 import io.pexkit.api.model.CollectionMedia
 import io.pexkit.api.model.asPhoto
-import io.pexkit.api.model.asUnknown
 import io.pexkit.api.model.asVideo
 import io.pexkit.api.model.aspectRatio
 import io.pexkit.api.response.PexKitError
 import io.pexkit.api.response.PexKitException
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertIs
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -23,25 +18,25 @@ import kotlin.test.assertTrue
 class ValidationTest {
 
     @Test
-    fun collectionIdValidAlphanumeric() {
+    fun `collection ID accepts valid alphanumeric lowercase`() {
         val url = Endpoints.collectionMedia("abc123")
         assertEquals("https://api.pexels.com/v1/collections/abc123", url)
     }
 
     @Test
-    fun collectionIdValidUppercase() {
+    fun `collection ID accepts valid alphanumeric uppercase`() {
         val url = Endpoints.collectionMedia("ABC123")
         assertEquals("https://api.pexels.com/v1/collections/ABC123", url)
     }
 
     @Test
-    fun collectionIdValidMixedCase() {
+    fun `collection ID accepts valid alphanumeric mixed case`() {
         val url = Endpoints.collectionMedia("AbC123xYz")
         assertEquals("https://api.pexels.com/v1/collections/AbC123xYz", url)
     }
 
     @Test
-    fun collectionIdRejectsSpecialCharacters() {
+    fun `collection ID rejects special characters`() {
         assertFailsWith<IllegalArgumentException> {
             Endpoints.collectionMedia("abc-123")
         }.also {
@@ -50,28 +45,28 @@ class ValidationTest {
     }
 
     @Test
-    fun collectionIdRejectsPathTraversal() {
+    fun `collection ID rejects path traversal`() {
         assertFailsWith<IllegalArgumentException> {
             Endpoints.collectionMedia("../etc/passwd")
         }
     }
 
     @Test
-    fun collectionIdRejectsSlash() {
+    fun `collection ID rejects slash`() {
         assertFailsWith<IllegalArgumentException> {
             Endpoints.collectionMedia("abc/123")
         }
     }
 
     @Test
-    fun collectionIdRejectsSpaces() {
+    fun `collection ID rejects spaces`() {
         assertFailsWith<IllegalArgumentException> {
             Endpoints.collectionMedia("abc 123")
         }
     }
 
     @Test
-    fun collectionIdRejectsEmpty() {
+    fun `collection ID rejects empty string`() {
         assertFailsWith<IllegalArgumentException> {
             Endpoints.collectionMedia("")
         }
@@ -79,7 +74,7 @@ class ValidationTest {
 
 
     @Test
-    fun photosSearchRejectsBlankQuery() = runTest {
+    fun `photos search rejects blank query`() = runTest {
         val client = createTestClientWithResponse(MockResponses.PHOTOS_SEARCH)
 
         assertFailsWith<IllegalArgumentException> {
@@ -92,7 +87,7 @@ class ValidationTest {
     }
 
     @Test
-    fun photosSearchRejectsWhitespaceOnlyQuery() = runTest {
+    fun `photos search rejects whitespace only query`() = runTest {
         val client = createTestClientWithResponse(MockResponses.PHOTOS_SEARCH)
 
         assertFailsWith<IllegalArgumentException> {
@@ -103,7 +98,7 @@ class ValidationTest {
     }
 
     @Test
-    fun photosSearchRejectsQueryExceeding200Characters() = runTest {
+    fun `photos search rejects query exceeding 200 characters`() = runTest {
         val client = createTestClientWithResponse(MockResponses.PHOTOS_SEARCH)
         val longQuery = "a".repeat(201)
 
@@ -117,7 +112,7 @@ class ValidationTest {
     }
 
     @Test
-    fun photosSearchAcceptsQueryAt200Characters() = runTest {
+    fun `photos search accepts query at 200 characters`() = runTest {
         val client = createTestClientWithResponse(MockResponses.PHOTOS_SEARCH)
         val query200 = "a".repeat(200)
 
@@ -128,7 +123,7 @@ class ValidationTest {
     }
 
     @Test
-    fun videosSearchRejectsBlankQuery() = runTest {
+    fun `videos search rejects blank query`() = runTest {
         val client = createTestClientWithResponse(MockResponses.VIDEOS_SEARCH)
 
         assertFailsWith<IllegalArgumentException> {
@@ -141,7 +136,7 @@ class ValidationTest {
     }
 
     @Test
-    fun videosSearchRejectsWhitespaceOnlyQuery() = runTest {
+    fun `videos search rejects whitespace only query`() = runTest {
         val client = createTestClientWithResponse(MockResponses.VIDEOS_SEARCH)
 
         assertFailsWith<IllegalArgumentException> {
@@ -152,7 +147,7 @@ class ValidationTest {
     }
 
     @Test
-    fun videosSearchRejectsQueryExceeding200Characters() = runTest {
+    fun `videos search rejects query exceeding 200 characters`() = runTest {
         val client = createTestClientWithResponse(MockResponses.VIDEOS_SEARCH)
         val longQuery = "a".repeat(201)
 
@@ -166,7 +161,7 @@ class ValidationTest {
     }
 
     @Test
-    fun videosSearchAcceptsQueryAt200Characters() = runTest {
+    fun `videos search accepts query at 200 characters`() = runTest {
         val client = createTestClientWithResponse(MockResponses.VIDEOS_SEARCH)
         val query200 = "a".repeat(200)
 
@@ -178,7 +173,7 @@ class ValidationTest {
 
 
     @Test
-    fun asPhotoReturnsNullForUnknown() {
+    fun `asPhoto returns null for Unknown media type`() {
         val unknown: CollectionMedia = CollectionMedia.Unknown(
             id = 1L,
             width = 100,
@@ -191,7 +186,7 @@ class ValidationTest {
     }
 
     @Test
-    fun asVideoReturnsNullForUnknown() {
+    fun `asVideo returns null for Unknown media type`() {
         val unknown: CollectionMedia = CollectionMedia.Unknown(
             id = 1L,
             width = 100,
@@ -204,14 +199,14 @@ class ValidationTest {
     }
 
     @Test
-    fun photoAspectRatioCalculatesCorrectly() {
+    fun `photo aspectRatio calculates correctly`() {
         val photo = MockData.photo
         val expectedRatio = photo.width.toFloat() / photo.height
         assertEquals(expectedRatio, photo.aspectRatio(), 0.001f)
     }
 
     @Test
-    fun photoAspectRatioThrowsWhenHeightIsZero() {
+    fun `photo aspectRatio throws when height is zero`() {
         val photo = MockData.photo.copy(height = 0)
 
         assertFailsWith<IllegalStateException> {
@@ -222,7 +217,7 @@ class ValidationTest {
     }
 
     @Test
-    fun photoAspectRatioThrowsWhenHeightIsNegative() {
+    fun `photo aspectRatio throws when height is negative`() {
         val photo = MockData.photo.copy(height = -1)
 
         assertFailsWith<IllegalStateException> {
@@ -233,14 +228,14 @@ class ValidationTest {
     }
 
     @Test
-    fun videoAspectRatioCalculatesCorrectly() {
+    fun `video aspectRatio calculates correctly`() {
         val video = MockData.video
         val expectedRatio = video.width.toFloat() / video.height
         assertEquals(expectedRatio, video.aspectRatio(), 0.001f)
     }
 
     @Test
-    fun videoAspectRatioThrowsWhenHeightIsZero() {
+    fun `video aspectRatio throws when height is zero`() {
         val video = MockData.video.copy(height = 0)
 
         assertFailsWith<IllegalStateException> {
@@ -251,7 +246,7 @@ class ValidationTest {
     }
 
     @Test
-    fun videoAspectRatioThrowsWhenHeightIsNegative() {
+    fun `video aspectRatio throws when height is negative`() {
         val video = MockData.video.copy(height = -1)
 
         assertFailsWith<IllegalStateException> {
@@ -262,7 +257,7 @@ class ValidationTest {
     }
 
     @Test
-    fun networkErrorPreservesCauseInException() {
+    fun `NetworkError preserves cause in exception`() {
         val originalException = RuntimeException("Connection refused")
         val networkError = PexKitError.NetworkError(cause = originalException)
         val pexKitException = PexKitException(networkError)
@@ -272,7 +267,7 @@ class ValidationTest {
     }
 
     @Test
-    fun unauthorizedErrorHasNullCause() {
+    fun `Unauthorized error has null cause`() {
         val error = PexKitError.Unauthorized()
         val exception = PexKitException(error)
 
@@ -281,7 +276,7 @@ class ValidationTest {
     }
 
     @Test
-    fun forbiddenErrorHasNullCause() {
+    fun `Forbidden error has null cause`() {
         val error = PexKitError.Forbidden()
         val exception = PexKitException(error)
 
@@ -289,7 +284,7 @@ class ValidationTest {
     }
 
     @Test
-    fun notFoundErrorHasNullCause() {
+    fun `NotFound error has null cause`() {
         val error = PexKitError.NotFound(resource = "photo/123")
         val exception = PexKitException(error)
 
@@ -297,7 +292,7 @@ class ValidationTest {
     }
 
     @Test
-    fun rateLimitedErrorHasNullCause() {
+    fun `RateLimited error has null cause`() {
         val error = PexKitError.RateLimited(retryAfter = 60)
         val exception = PexKitException(error)
 
@@ -305,7 +300,7 @@ class ValidationTest {
     }
 
     @Test
-    fun serverErrorHasNullCause() {
+    fun `ServerError has null cause`() {
         val error = PexKitError.ServerError(statusCode = 500)
         val exception = PexKitException(error)
 
@@ -313,7 +308,7 @@ class ValidationTest {
     }
 
     @Test
-    fun unknownErrorHasNullCause() {
+    fun `Unknown error has null cause`() {
         val error = PexKitError.Unknown(statusCode = 418, body = "I'm a teapot")
         val exception = PexKitException(error)
 
@@ -321,7 +316,7 @@ class ValidationTest {
     }
 
     @Test
-    fun exceptionCauseChainIsPreserved() {
+    fun `exception cause chain is fully preserved`() {
         val rootCause = IllegalStateException("Root cause")
         val intermediateCause = RuntimeException("Intermediate", rootCause)
         val networkError = PexKitError.NetworkError(cause = intermediateCause)

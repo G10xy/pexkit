@@ -22,7 +22,7 @@ class SerializationTest {
     private val json = Json { ignoreUnknownKeys = true }
 
     @Test
-    fun deserializePhoto() {
+    fun `deserializes Photo with all properties`() {
         val photo = json.decodeFromString<Photo>(MockResponses.PHOTO)
 
         assertEquals(MockData.photo.id, photo.id)
@@ -41,7 +41,7 @@ class SerializationTest {
     }
 
     @Test
-    fun deserializePhotosSearchResponse() {
+    fun `deserializes PhotosApiResponse with pagination`() {
         val response = json.decodeFromString<PhotosApiResponse>(MockResponses.PHOTOS_SEARCH)
 
         assertEquals(1, response.page)
@@ -56,7 +56,7 @@ class SerializationTest {
     }
 
     @Test
-    fun deserializeVideo() {
+    fun `deserializes Video with all properties`() {
         val video = json.decodeFromString<Video>(MockResponses.VIDEO)
 
         assertEquals(MockData.video.id, video.id)
@@ -83,7 +83,7 @@ class SerializationTest {
     }
 
     @Test
-    fun deserializeVideosSearchResponse() {
+    fun `deserializes VideosApiResponse with pagination`() {
         val response = json.decodeFromString<VideosApiResponse>(MockResponses.VIDEOS_SEARCH)
 
         assertEquals(1, response.page)
@@ -94,7 +94,7 @@ class SerializationTest {
     }
 
     @Test
-    fun deserializeCollection() {
+    fun `deserializes Collection with all properties`() {
         val collection = json.decodeFromString<Collection>(MockResponses.COLLECTION)
 
         assertEquals(MockData.collection.id, collection.id)
@@ -107,7 +107,7 @@ class SerializationTest {
     }
 
     @Test
-    fun deserializeCollectionsListResponse() {
+    fun `deserializes CollectionsApiResponse with pagination`() {
         val response = json.decodeFromString<CollectionsApiResponse>(MockResponses.COLLECTIONS_LIST)
 
         assertEquals(1, response.page)
@@ -120,7 +120,7 @@ class SerializationTest {
     }
 
     @Test
-    fun deserializeCollectionMediaResponse() {
+    fun `deserializes CollectionMediaApiResponse with photos and videos`() {
         val response = json.decodeFromString<CollectionMediaApiResponse>(MockResponses.COLLECTION_MEDIA)
 
         assertEquals("abc123", response.id)
@@ -143,7 +143,7 @@ class SerializationTest {
     }
 
     @Test
-    fun photoAspectRatio() {
+    fun `calculates Photo aspectRatio correctly`() {
         val photo = json.decodeFromString<Photo>(MockResponses.PHOTO)
         val aspectRatio = photo.aspectRatio()
 
@@ -152,7 +152,7 @@ class SerializationTest {
     }
 
     @Test
-    fun videoAspectRatio() {
+    fun `calculates Video aspectRatio correctly`() {
         val video = json.decodeFromString<Video>(MockResponses.VIDEO)
         val aspectRatio = video.aspectRatio()
 
@@ -161,7 +161,7 @@ class SerializationTest {
     }
 
     @Test
-    fun paginatedResponseHelpers() {
+    fun `PaginatedResponse helpers work correctly`() {
         val response = json.decodeFromString<PhotosApiResponse>(MockResponses.PHOTOS_SEARCH)
         val paginated = response.toPaginatedResponse()
 

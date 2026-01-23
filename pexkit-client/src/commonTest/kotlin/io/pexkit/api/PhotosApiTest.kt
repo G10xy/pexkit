@@ -20,7 +20,7 @@ import kotlin.test.fail
 class PhotosApiTest {
 
     @Test
-    fun searchPhotosReturnsSuccess() = runTest {
+    fun `search returns success with photos`() = runTest {
         val client = createTestClientWithResponse(MockResponses.PHOTOS_SEARCH)
 
         when (val result = client.photos.search("nature")) {
@@ -38,7 +38,7 @@ class PhotosApiTest {
     }
 
     @Test
-    fun searchPhotosIncludesRateLimitInfo() = runTest {
+    fun `search includes rate limit info in response`() = runTest {
         val client = createTestClientWithResponse(
             body = MockResponses.PHOTOS_SEARCH,
             rateLimitHeaders = RateLimitHeaders(limit = 200, remaining = 150, reset = 1234567890L),
@@ -57,7 +57,7 @@ class PhotosApiTest {
     }
 
     @Test
-    fun searchPhotosWithFilters() = runTest {
+    fun `search applies filters to request URL`() = runTest {
         var capturedUrl: String? = null
 
         val mockEngine = MockEngine { request ->
@@ -96,7 +96,7 @@ class PhotosApiTest {
     }
 
     @Test
-    fun curatedPhotosReturnsSuccess() = runTest {
+    fun `curated returns success with photos`() = runTest {
         val client = createTestClientWithResponse(MockResponses.PHOTOS_SEARCH)
 
         when (val result = client.photos.curated()) {
@@ -110,7 +110,7 @@ class PhotosApiTest {
     }
 
     @Test
-    fun getPhotoByIdReturnsSuccess() = runTest {
+    fun `get by ID returns success with photo`() = runTest {
         val client = createTestClientWithResponse(MockResponses.PHOTO)
 
         when (val result = client.photos.get(MockData.photo.id)) {
@@ -125,7 +125,7 @@ class PhotosApiTest {
     }
 
     @Test
-    fun searchPhotosIncludesAuthorizationHeader() = runTest {
+    fun `search includes Authorization header in request`() = runTest {
         var authHeader: String? = null
 
         val mockEngine = MockEngine { request ->

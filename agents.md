@@ -622,18 +622,8 @@ Pure async wrappers returning `CompletableFuture` — for async Java code:
 Create separate test files for blocking and async APIs:
 
 **`src/jvmTest/kotlin/io/pexkit/api/BlockingApiTest.kt`:**
-- [✅] Blocking search returns photos
-- [✅] Blocking curated returns photos
-- [✅] Blocking get photo/video by ID works
-- [✅] Blocking API throws `PexKitException` on error (401, 404, 429)
-- [✅] `AutoCloseable` works correctly (try-with-resources pattern)
 
 **`src/jvmTest/kotlin/io/pexkit/api/AsyncApiTest.kt`:**
-- [✅] Async search returns `CompletableFuture` that resolves correctly
-- [✅] Async curated returns `CompletableFuture` that resolves correctly
-- [✅] Async get photo/video by ID returns `CompletableFuture` that resolves correctly
-- [✅] Async API completes exceptionally with `PexKitException` on error (401, 404, 429)
-- [✅] `AutoCloseable` works correctly (try-with-resources pattern)
 
 #### 7.5 Update Documentation
 - [✅] Add "Backend Usage" section to README.md with examples for:
@@ -844,7 +834,7 @@ class AsyncApiTest {
 
 ---
 
-## 📝 Notes for Development
+## 📝 Notes for Agents/Developers
 
 1. **Always prefer idiomatic Kotlin** over Java-style code
 2. **Use explicit visibility modifiers** (`public`, `internal`, `private`)

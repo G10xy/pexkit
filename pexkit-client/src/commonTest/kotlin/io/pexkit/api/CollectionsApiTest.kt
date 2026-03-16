@@ -119,7 +119,7 @@ class CollectionsApiTest {
         client.collections.media(MockData.collection.id, type = MediaType.PHOTOS)
 
         assertNotNull(capturedUrl)
-        assertTrue(capturedUrl!!.contains("type=photos"))
+        assertTrue(capturedUrl.contains("type=photos"))
 
         client.close()
     }
@@ -148,8 +148,8 @@ class CollectionsApiTest {
         )
 
         assertNotNull(capturedUrl)
-        assertTrue(capturedUrl!!.contains("page=3"))
-        assertTrue(capturedUrl!!.contains("per_page=50"))
+        assertTrue(capturedUrl.contains("page=3"))
+        assertTrue(capturedUrl.contains("per_page=50"))
 
         client.close()
     }

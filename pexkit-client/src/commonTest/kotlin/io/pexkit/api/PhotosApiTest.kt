@@ -85,12 +85,12 @@ class PhotosApiTest {
         )
 
         assertNotNull(capturedUrl)
-        assertTrue(capturedUrl!!.contains("query=nature"))
-        assertTrue(capturedUrl!!.contains("orientation=landscape"))
-        assertTrue(capturedUrl!!.contains("size=large"))
-        assertTrue(capturedUrl!!.contains("color=FF5733"))
-        assertTrue(capturedUrl!!.contains("page=2"))
-        assertTrue(capturedUrl!!.contains("per_page=30"))
+        assertTrue(capturedUrl.contains("query=nature"))
+        assertTrue(capturedUrl.contains("orientation=landscape"))
+        assertTrue(capturedUrl.contains("size=large"))
+        assertTrue(capturedUrl.contains("color=FF5733"))
+        assertTrue(capturedUrl.contains("page=2"))
+        assertTrue(capturedUrl.contains("per_page=30"))
 
         client.close()
     }
